@@ -3,7 +3,7 @@ class Path:
         self._case = []
     
     def __repr__(self):
-        return f"Case(case='{self.getCaseArray}')"
+        return f"Path = {self.getCaseArray}"
 
     # Setters
 
@@ -26,3 +26,7 @@ class Path:
     @property
     def getCaseArray(self):
         return self._case
+    
+    @property
+    def getLength(self):
+        return len(self._case)

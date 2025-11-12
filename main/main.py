@@ -1,10 +1,14 @@
 from plateau.plateau_utils import *
 
-print("hello world")
-print("test")
-
-print("slt")
-
 plat = makePlateau()
-plat.addPath(makePath())
-print(plat)
+path = makePath()
+pion = makePion()
+case = makeCase()
+
+path.addCase(case)
+path.addCase(case)
+path.addCase(case)
+
+plat.addPath(path)
+plat.setPion(pion)
+movePion(plat, 1)

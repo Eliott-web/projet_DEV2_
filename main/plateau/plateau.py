@@ -1,9 +1,10 @@
 class Plateau:
     def __init__(self):
         self._path = []
+        self._pion = None
     
     def __repr__(self):
-        return f"Plateau(path='{self.getPathArray}')"
+        return f"Le plateau contient {self.getPathArray}"
 
     # Setters
 
@@ -21,8 +22,15 @@ class Plateau:
     def setPathArray(self,path): ## !!! Ca doit être un array
         self._path = path
 
+    def setPion(self, pion):
+        self._pion = pion
+
     # Getters
 
     @property
     def getPathArray(self):
         return self._path
+    
+    @property
+    def getPion(self):
+        return self._pion
