@@ -21,8 +21,9 @@ def movePionOnPath(pion, path, steps):
     print("Le pion est à la position :", new_position)
     if reachedEnd:
         print("Le pion a atteint la fin, on l'applaudie !!! 🎉🎉🎉")
+    return reachedEnd
 
 def plateauMovePion(plateau, steps):
     pion = plateau.getPion
     path = plateau.getPathArray[pion.getPath]
-    movePionOnPath(pion, path, steps)
+    return movePionOnPath(pion, path, steps)
