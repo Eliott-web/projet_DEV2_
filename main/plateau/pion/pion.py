@@ -2,6 +2,7 @@ class Pion:
     def __init__(self):
         self._case = 0
         self._path = 0
+        self._plateau = None
     
     def __repr__(self):
         return f"case"
@@ -14,6 +15,9 @@ class Pion:
     def setPath(self, path):
         self._path = path
 
+    def setPlateau(self, plateau):
+        self._plateau = plateau
+
     # Getters
 
     @property
@@ -23,3 +27,7 @@ class Pion:
     @property
     def getPath(self):
         return self._path
+    
+    @property
+    def getPlateau(self):
+        return self._plateau
