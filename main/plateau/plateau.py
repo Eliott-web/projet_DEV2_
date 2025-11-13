@@ -24,6 +24,8 @@ class Plateau:
 
     def setPion(self, pion):
         self._pion = pion
+        pion.setPlateau(self)
+        
 
     # Getters
 
