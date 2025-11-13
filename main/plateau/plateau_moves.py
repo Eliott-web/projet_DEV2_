@@ -20,7 +20,6 @@ def movePionOnPath(pion, path, steps):
     pion.setCase(new_position)
     #print("Ce chemin comportre", posMax + 1, "cases." "(index de", 0, "à", posMax,")")
     showPionPosition(plateau)
-    print("Le pion est à la position :", new_position)
     if reachedEnd:
         print("Le pion a atteint la fin, on l'applaudie !!! 🎉🎉🎉")
     return reachedEnd

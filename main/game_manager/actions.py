@@ -6,4 +6,3 @@ def actionInput(plateau):
     if reachedEnd:
         return
     actionInput(plateau)
-    print("")
