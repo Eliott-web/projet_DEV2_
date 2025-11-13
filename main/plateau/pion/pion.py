@@ -39,5 +39,5 @@ class Pion:
         return self._plateau
     
     @property
-        def getInventaire(self):
-            return self._inventaire
+    def getInventaire(self):
+        return self._inventaire
