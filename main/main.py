@@ -1,4 +1,4 @@
-from game_manager.actions import actionInput
+from game_manager.actions_utils import initGamePlay
 from plateau.plateau_utils import *
 
 plat = makePlateau()
@@ -12,4 +12,4 @@ path = makePathLength(10)
 plat.addPath(path)
 plat.setPion(pion)
 movePion(plat, 0)
-actionInput(plat)
+initGamePlay(plat)
