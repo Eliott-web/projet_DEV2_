@@ -1,29 +1,43 @@
-import random
+from .score_utils import verifier_nom, verifier_points
 
 class Score:
-    #Valeur de base
     basePoints = 5
-    def __init__(self, jouer):
-        self.jouer = jouer          #nom du jouer
-        self.points = Score.basePoints            #création du score initial de 5 car on veut que le joueur commece avec 5 pièces
 
-    def ajouter_points(self, min_points = 1, max_points = 15):
-        #on ajoute les points au joueur aléatoirement entre 1 et 15
-        nbr = random.randint(min_points, max_points)
-        self.points += nbr
-        print(f"le jouer ${self.jouer} a gagné {nbr} points. Tu as un total de {self.points} points.")  #message pour vérifier le bon fonctionnement
+    def __init__(self, joueur):
+        self._joueur = verifier_nom(joueur)
+        self._points = Score.basePoints
+
+    # --- GETTERS / SETTERS ---
+    @property
+    def joueur(self):
+        return self._joueur
+
+    @joueur.setter
+    def joueur(self, nouveau_nom):
+        self._joueur = verifier_nom(nouveau_nom)
+
+    @property
+    def points(self):
+        return self._points
+
+    @points.setter
+    def points(self, valeur):
+        valeur = verifier_points(valeur)
+        self._points = valeur
+
+    # --- MÉTHODES DU SCORE ---
+    def ajouter_points(self, points=3):
+        verifier_points(points)
+        self._points += points
+        print(f"Le joueur {self._joueur} a gagné {points} points. "
+              f"Tu as un total de {self._points} points.")
 
     def retirer_points(self):
-        self.points -= 3
-        #vérifier si le joueur a encore des points
-        if self.points < 0:
-            self.points = 0     #on dit que le score ne peut pas être négatif
-
-        print(f"Vous avez perdu, vous n'avez plus de points.")
-
-    def reset_scores(self):
-        self.points = Score.basePoints
-        print(f"Le score a été remis à ${self.points} points.")
+        self._points -= 3
+        if self._points < 0:
+            self._points = 0
+        print(f"Le joueur {self._joueur} a perdu 3 points. "
+              f"Score actuel : {self._points}")
 
     def afficher_score(self):
-        print(f"Votre score est actuellement de {self.points} points.")
+        print(f"Votre score est actuellement de {self._points} points.")
