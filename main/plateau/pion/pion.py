@@ -1,10 +1,13 @@
+from projet_DEV2_.main.score.score import Score
+
+
 class Pion:
     def __init__(self):
         self._case = 0
         self._path = 0
         self._plateau = None
         self._inventaire = []
-    
+        self.score = Score.basePoints
     def __repr__(self):
         return f"case"
     
