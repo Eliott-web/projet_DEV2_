@@ -1,4 +1,4 @@
-from projet_DEV2_.main.score.score import Score
+from score.score import Score
 
 
 class Pion:
@@ -7,7 +7,7 @@ class Pion:
         self._path = 0
         self._plateau = None
         self._inventaire = []
-        self.score = Score.basePoints
+        self._score = Score.basePoints
     def __repr__(self):
         return f"case"
     
@@ -26,6 +26,9 @@ class Pion:
 
         print(f"[Tu as obtenu : {item}]")
         self._inventaire.append(item)
+    
+    def setScore(self, points):
+        self._score = points
 
     # Getters
 
@@ -44,3 +47,7 @@ class Pion:
     @property
     def getInventaire(self):
         return self._inventaire
+    
+    @property
+    def getScore(self):
+        return self._score
