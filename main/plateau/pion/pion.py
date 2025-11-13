@@ -3,7 +3,7 @@ class Pion:
         self._case = 0
         self._path = 0
         self._plateau = None
-        self.inventaire = []
+        self._inventaire = []
     
     def __repr__(self):
         return f"case"
@@ -21,8 +21,8 @@ class Pion:
 
     def ajouter_item(self, item):
 
-        print(f"[{self.nom} a obtenu : {item.nom}]")
-        self.inventaire.append(item)
+        print(f"[Tu as obtenu : {item}]")
+        self._inventaire.append(item)
 
     # Getters
 
@@ -39,5 +39,5 @@ class Pion:
         return self._plateau
     
     @property
-    def getAjouter_item(self):
-        return self.inventaire
+        def getInventaire(self):
+            return self._inventaire
