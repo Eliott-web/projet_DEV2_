@@ -12,7 +12,7 @@ class Item:
     def __str__(self):
         """
         Cette méthode spéciale définit ce qui s'affiche
-        quand on fait print(mon_item). C'est très pratique !
+        quand on fait print(mon_item).
         """
         return f"Objet: {self.nom} (Info: {self.description})"
     def utiliser(self, joueur):

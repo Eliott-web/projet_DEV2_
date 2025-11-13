@@ -3,6 +3,7 @@ class Pion:
         self._case = 0
         self._path = 0
         self._plateau = None
+        self.inventaire = []
     
     def __repr__(self):
         return f"case"
@@ -18,6 +19,11 @@ class Pion:
     def setPlateau(self, plateau):
         self._plateau = plateau
 
+    def ajouter_item(self, item):
+
+        print(f"[{self.nom} a obtenu : {item.nom}]")
+        self.inventaire.append(item)
+
     # Getters
 
     @property
@@ -31,3 +37,7 @@ class Pion:
     @property
     def getPlateau(self):
         return self._plateau
+    
+    @property
+    def getAjouter_item(self):
+        return self.inventaire

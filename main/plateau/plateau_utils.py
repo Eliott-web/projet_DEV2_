@@ -29,3 +29,5 @@ def makePion(): #Créer un pion
 
 def movePion(plateau, steps): #Déplacer un pion sur le plateau / RETOURNE si le pion a atteint la fin
     return plateauMovePion(plateau, steps)
+
+def ajouter_item(self, item): 
