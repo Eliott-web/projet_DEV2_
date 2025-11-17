@@ -1,4 +1,4 @@
-from mini_game import MiniGame
+from mini_game_utils import *
 
-mini_game = MiniGame("Test Game", "This is a test mini-game.")
+mini_game = getMiniGameInstance("Test Game", "A simple test mini-game.")
 mini_game.start()
