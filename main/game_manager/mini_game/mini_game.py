@@ -1,6 +1,7 @@
 import time
+from controls_getter import ControlsGetter
 
-class MiniGame:
+class MiniGame(ControlsGetter):
     default_time_limit = 3  # secondes
     refresh_rate = 20  # FPS
     
@@ -46,7 +47,7 @@ class MiniGame:
     def getTimeLimit(self):
         return self._time_limit
     
-    
+
     # Loop methods
     def winCondition(self):
         # Placeholder for win condition logic
@@ -59,6 +60,9 @@ class MiniGame:
         return 1 / self.getRefreshRate()
     
     def loop(self):
+
+        self.checkControls() # Check for user inputs
+
         refreshDelay = self.gerRefreshRatePeriod()
         end = self.update_timer()
         win = self.winCondition()
