@@ -1,4 +1,5 @@
-from utils.validators import verifier_points
+from validators import verifier_points
+
 
 def ajouter_points_actuel(points_actuels: int, ajout: int) -> int:
     verifier_points(ajout)
