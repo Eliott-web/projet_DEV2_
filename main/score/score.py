@@ -1,4 +1,6 @@
-from .score_utils import verifier_nom, verifier_points
+from utils.validators import verifier_nom, verifier_points
+from score_utils import ajouter_points_actuel, retirer_points_actuel
+
 
 class Score:
     basePoints = 5
@@ -22,21 +24,17 @@ class Score:
 
     @points.setter
     def points(self, valeur):
-        valeur = verifier_points(valeur)
-        self._points = valeur
+        self._points = verifier_points(valeur)
 
     # --- MÉTHODES DU SCORE ---
     def ajouter_points(self, points=3):
-        verifier_points(points)
-        self._points += points
+        self._points = ajouter_points_actuel(self._points, points)
         print(f"Le joueur {self._joueur} a gagné {points} points. "
               f"Tu as un total de {self._points} points.")
 
-    def retirer_points(self):
-        self._points -= 3
-        if self._points < 0:
-            self._points = 0
-        print(f"Le joueur {self._joueur} a perdu 3 points. "
+    def retirer_points(self, retrait=3):
+        self._points = retirer_points_actuel(self._points, retrait)
+        print(f"Le joueur {self._joueur} a perdu {retrait} points. "
               f"Score actuel : {self._points}")
 
     def afficher_score(self):

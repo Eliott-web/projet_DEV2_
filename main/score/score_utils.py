@@ -1,11 +1,10 @@
-def verifier_nom(nom):
-    """Vérifie que le nom du joueur est valide (non vide)."""
-    if not nom.strip():
-        raise ValueError("Le nom du joueur ne peut pas être vide.")
-    return nom
+from utils.validators import verifier_points
 
-def verifier_points(points):
-    """Vérifie que le nombre de points est valide (non négatif)."""
-    if points < 0:
-        raise ValueError("Les points ne peuvent pas être négatifs.")
-    return points
+def ajouter_points_actuel(points_actuels: int, ajout: int) -> int:
+    verifier_points(ajout)
+    return points_actuels + ajout
+
+
+def retirer_points_actuel(points_actuels: int, retrait: int = 3) -> int:
+    points_actuels -= retrait
+    return max(points_actuels, 0)
