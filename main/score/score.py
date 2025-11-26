@@ -1,5 +1,5 @@
-from validators import verifier_nom, verifier_points
-from score_utils import ajouter_points_actuel, retirer_points_actuel
+from .validators import verifier_nom, verifier_points
+from .score_utils import ajouter_points_actuel, retirer_points_actuel
 
 
 
