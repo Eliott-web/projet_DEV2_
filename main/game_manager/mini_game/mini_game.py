@@ -1,5 +1,6 @@
 import time
-from controls_getter import ControlsGetter
+import threading
+from controls.controls_getter import ControlsGetter
 
 class MiniGame(ControlsGetter):
     default_time_limit = 3  # secondes
@@ -49,8 +50,7 @@ class MiniGame(ControlsGetter):
     
 
     # Loop methods
-    def winCondition(self):
-        # Placeholder for win condition logic
+    def winCondition(self): # ⚠️ Definir dans le mini-jeu ⚠️
         return False
 
     def getRefreshRate(self):
@@ -71,7 +71,7 @@ class MiniGame(ControlsGetter):
             self.end(win)
             return  # End the loop
         
-        print(f"Timer: {self.getTimer():.2f}s / {self.getTimeLimit()}s")
-        time.sleep(refreshDelay)
-        self.loop()  # Continue the loop
+        #print(f"Timer: {self.getTimer():.2f}s / {self.getTimeLimit()}s")
+        
+        threading.Timer(refreshDelay, self.loop).start() # Continue the loop
         

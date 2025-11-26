@@ -10,14 +10,18 @@ class ControlsGetter:
             self._listener.start()
 
     def on_press(self, key):
+        pass
+    '''
         if key == keyboard.Key.space:
             self.space_pressed()
 
         elif key == keyboard.Key.left:
             self.left_pressed()
-
+        
+    
     def space_pressed(self):
         print("Spacebar pressed!")
 
     def left_pressed(self):
         print("Left arrow pressed!")
+    '''
