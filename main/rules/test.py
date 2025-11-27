@@ -1,4 +1,4 @@
-from rules import Rules
+from main.rules.rule import Rules
 
 r = Rules()
 r.on_add("test", "test")
