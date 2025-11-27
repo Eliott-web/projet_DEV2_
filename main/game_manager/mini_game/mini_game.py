@@ -11,6 +11,7 @@ class MiniGame(ControlsGetter):
         self._description = description
         self._time_limit = MiniGame.default_time_limit
         self._timer = 0
+        self._mobs = []
     
     def __repr__(self):
         return f"Mini-jeu: {self._name} - {self._description}"
@@ -27,6 +28,13 @@ class MiniGame(ControlsGetter):
         else:
             print(f"Vous avez échoué le mini-jeu: {self._name}. Essayez encore!")
         
+
+    #  mob methods
+        def add_mob(self, mob):
+            self._mobs.append(mob)
+
+        
+
 
     #  Timer methods
     def update_timer(self):

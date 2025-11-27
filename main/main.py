@@ -5,13 +5,13 @@ from score.score import Score
 
 joueur1 = Score("Eliott")
 
-joueur1.afficher_score()
-
 
 plat = makePlateau()
 path = makePath()
 pion = makePion()
 case = makeCase()
+
+pion.setScore(joueur1)
 
 #path.addCase(case)
 path = makePathLength(10)
