@@ -8,7 +8,7 @@ class MiniGameGarage(MiniGame, ControlTypeSpace):
 
         # Taille de la grille
         self._width = 10
-        self._height = 7
+        self._height = 10
 
         # Position de la voiture
         self._car_x = 0
