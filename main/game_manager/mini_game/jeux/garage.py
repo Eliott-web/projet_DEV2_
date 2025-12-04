@@ -1,7 +1,7 @@
-from ..controls.control_type_zqsd import ControlTypeSpace
+from ..controls.control_type_zqsd import ControlTypeZqsd
 from ..mini_game import MiniGame
 
-class MiniGameGarage(MiniGame, ControlTypeSpace):
+class MiniGameGarage(MiniGame, ControlTypeZqsd):
 
     def __init__(self):
         super().__init__("Parking Challenge", "Garez la voiture sur la place marquée !")
