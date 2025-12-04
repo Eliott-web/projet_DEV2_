@@ -1,7 +1,7 @@
 from pynput import keyboard
 from .controls_getter import ControlsGetter
 
-class ControlTypeSpace(ControlsGetter):
+class ControlTypeZqsd(ControlsGetter):
     pass
 
 
@@ -11,14 +11,19 @@ class ControlTypeSpace(ControlsGetter):
             self._listener.start()
 
     def on_press(self, key):
-        if key == keyboard.Key.left:
-            self.left_pressed()
-        if key == keyboard.Key.right:
-            self.right_pressed()
-        if key == keyboard.Key.down:
-            self.down_pressed()
-        if key == keyboard.Key.up:
-            self.up_pressed()
+        try:
+            if key.char == 'q':      # gauche
+                self.left_pressed()
+            if key.char == 'd':      # droite
+                self.right_pressed()
+            if key.char == 's':      # bas
+                self.down_pressed()
+            if key.char == 'z':      # haut
+                self.up_pressed()
+        except AttributeError:
+            # Ignore les touches spéciales (shift, ctrl, etc.)
+            pass
+
 
     def left_pressed(self): # En gros les gars faut le définir dans le mini-jeu
         print("Left pressed!")
