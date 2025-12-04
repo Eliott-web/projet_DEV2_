@@ -1,6 +1,7 @@
 import time
 import threading
-from controls.controls_getter import ControlsGetter
+from .mobs.mob import Mob
+from .controls.controls_getter import ControlsGetter
 
 class MiniGame(ControlsGetter):
     default_time_limit = 3  # secondes
@@ -23,6 +24,7 @@ class MiniGame(ControlsGetter):
         self.loop()
 
     def end(self, success):
+
         if success:
             print(f"Félicitations! Vous avez réussi le mini-jeu: {self._name}")
         else:
@@ -30,8 +32,8 @@ class MiniGame(ControlsGetter):
         
 
     #  mob methods
-        def add_mob(self, mob):
-            self._mobs.append(mob)
+    def add_mob(self, mob):
+        self._mobs.append(mob)
 
         
 
@@ -80,6 +82,7 @@ class MiniGame(ControlsGetter):
             return  # End the loop
         
         #print(f"Timer: {self.getTimer():.2f}s / {self.getTimeLimit()}s")
-        
+        for mob in self._mobs:
+            mob.loop()
         threading.Timer(refreshDelay, self.loop).start() # Continue the loop
         

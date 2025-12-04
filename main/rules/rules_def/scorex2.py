@@ -1,7 +1,6 @@
-from rule import Rule
+from .. import rule
 from score.score import Score
-
-class score2x(Rule):
+class score2x(rule.Rule):
 
     def __init__(self):
         super().__init__("Score x2", "Double les points gagnés")
