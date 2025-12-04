@@ -1,7 +1,7 @@
 
 from ..controls.control_type_space import ControlTypeSpace
 from ..mini_game import MiniGame
-from ..mobs.mob import Mob
+from ..entities.mobs.mob import Mob
 
 class MiniGameMario(MiniGame, ControlTypeSpace):
 
@@ -11,7 +11,7 @@ class MiniGameMario(MiniGame, ControlTypeSpace):
         self._jumps = 0
         self._required_jumps = 5  # Nombre de sauts requis pour gagner
 
-        mob = Mob("Tortue1", 0.5)
+        mob = Mob("Tortue1", 0.5, (2, 2))
         mob.set_destination(1.7, 0)
         self.add_mob(mob)
     

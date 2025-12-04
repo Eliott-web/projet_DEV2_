@@ -1,6 +1,5 @@
 import time
 import threading
-from .mobs.mob import Mob
 from .controls.controls_getter import ControlsGetter
 
 class MiniGame(ControlsGetter):

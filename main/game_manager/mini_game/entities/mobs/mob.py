@@ -1,10 +1,14 @@
-class Mob:
+from ..hitbox import Hitbox
+from ..objets.wall import Wall
+
+class Mob(Hitbox):
     def __init__(self, name, vitesse, hitbox_size):
+        position = (0,0)
+        super().__init__(hitbox_size, position, source=self)
         self._name = name
         self._vitesse = vitesse
-        self._position = (0, 0)
+        self._position = position
         self._destination = None
-        self._hitbox_size = hitbox_size
         
         
     def loop(self):
@@ -25,17 +29,28 @@ class Mob:
     def stop(self):
         self._destination = None
 
-    # Hitbox methods
-    def get_hitbox(self):
-        x, y = self._position
-        size = self._hitbox_size
-        return (x - size / 2, y - size / 2, x + size / 2, y + size / 2)
-    
-    def is_colliding_with(self, other_mob):
-        x1_min, y1_min, x1_max, y1_max = self.get_hitbox()
-        x2_min, y2_min, x2_max, y2_max = other_mob.get_hitbox()
+    #Hitbox Section
 
-        return not (x1_max < x2_min or x1_min > x2_max or y1_max < y2_min or y1_min > y2_max)
+    def is_colliding(self):
+        colliding = self.get_colliding_hitboxes()
+        if len(colliding) > 0:
+            return True
+        return False
+    
+    def get_colliding_hitboxes(self):
+        colliding = []
+        nearby_hitboxes = self.nearby()
+        for hb in nearby_hitboxes:
+            if hb.get_source() != self:
+                colliding.append(hb)
+        return colliding
+    
+    def is_colliding_with_walls(self):
+        colliding = self.get_colliding_hitboxes()
+        for hb in colliding:
+            if isinstance(hb.get_source(), Wall):
+                return True
+        return False
     
     # Position and movement methods
     def refresh_position(self):
