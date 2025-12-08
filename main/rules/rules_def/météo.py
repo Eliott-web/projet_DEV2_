@@ -1,5 +1,5 @@
-from rules.rule import Rule
-from score.score import Score
+from main.rules.rule import Rule
+from main.score.score import Score
 import random
 
 class Orage(rule.Rule):
