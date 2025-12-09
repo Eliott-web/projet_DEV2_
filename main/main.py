@@ -1,15 +1,9 @@
-from game_manager.actions_utils import initGamePlay
-from plateau.plateau_utils import *
-from score.score import Score
-from game_manager.mini_game.jeux.garage import MiniGameGarage
+from .gui.widget.manager import WidgetManager
+from .plateau.plateau_utils import makePlateau
 
+widget_manager = WidgetManager()
+plateau = makePlateau()
 
-joueur1 = Score("Eliott")
-
-car = MiniGameGarage()
-print(car)
-
-car.start()
 
 '''
 plat = makePlateau()

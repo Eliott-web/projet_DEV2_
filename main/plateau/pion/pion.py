@@ -1,4 +1,4 @@
-from score.score import Score
+from main.score.score import Score
 
 
 class Pion:

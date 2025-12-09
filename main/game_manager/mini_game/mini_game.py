@@ -1,5 +1,7 @@
 import time
 import threading
+
+from main.gui.fenetre import HEIGHT, WIDTH
 from .controls.controls_getter import ControlsGetter
 
 class MiniGame(ControlsGetter):
@@ -22,7 +24,13 @@ class MiniGame(ControlsGetter):
         self.reset_timer()
         self.loop()
 
+    def getCenterXY(self):
+        return (WIDTH/2, HEIGHT/2)  # Placeholder for center position
+
     def end(self, success):
+        for mob in self._mobs:
+            mob.kill()
+        self._mobs.clear()
 
         if success:
             print(f"Félicitations! Vous avez réussi le mini-jeu: {self._name}")

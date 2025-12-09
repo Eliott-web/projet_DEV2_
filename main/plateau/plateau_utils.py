@@ -1,9 +1,9 @@
-from plateau.plateau import Plateau
-from plateau.path.path import Path
-from plateau.case.case import Case
-from plateau.pion.pion import Pion
-from plateau.plateau_moves import plateauMovePion
-from plateau.path.path_moves import makePathWithLength
+from .plateau import Plateau
+from .path.path import Path
+from .case.case import Case
+from .pion.pion import Pion
+from .plateau_moves import plateauMovePion
+from .path.path_moves import makePathWithLength
 
 # Y a des fonction utilitaires pour chacunes des classes, mettez un . et vous verrez !
 
