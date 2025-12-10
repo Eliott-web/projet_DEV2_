@@ -1,44 +1,42 @@
 from main.gui.fenetre import HEIGHT, WIDTH
 from ..hitbox import Hitbox
 from ..objets.wall import Wall
+from ..objets.ground import Ground  # Import the new Ground class
 
 class Mob(Hitbox):
     def __init__(self, name, vitesse, position, hitbox_size=(50, 50), gravity=0.5):
-        super().__init__(self, position, hitbox_size)
+        # Fix: The first argument to super().__init__() should not be 'self'
+        super().__init__(position, hitbox_size)
         self._name = name
-        self._vitesse = vitesse  # Base movement speed
+        self._vitesse = vitesse
         self._position = position
         self._destination = None
         self._position0 = position
         
         # Physics properties
-        self._velocity = [0.0, 0.0]  # [vx, vy]
-        self._acceleration = [0.0, 0.0]  # [ax, ay]
-        self._gravity = gravity  # Default gravity strength
+        self._velocity = [0.0, 0.0]
+        self._acceleration = [0.0, 0.0]
+        self._gravity = gravity
         self._gravity_enabled = True
-        self._mass = 1.0  # Mass affects how forces apply
-        self._friction = 0.9  # Ground friction (0.0 to 1.0)
-        self._air_resistance = 0.98  # Air resistance (0.0 to 1.0)
-        self._max_fall_speed = 15.0  # Terminal velocity
+        self._mass = 1.0
+        self._friction = 0.9
+        self._air_resistance = 0.98
+        self._max_fall_speed = 15.0
         self._is_grounded = False
-        self._jump_power = 12.0  # Jump strength
-        self._apply_forces = True  # Enable/disable physics
+        self._jump_power = 12.0
+        self._apply_forces = True
         
-    # Existing methods remain...
+        # Ground detection
+        self._ground_check_offset = 5  # How far below to check for ground
+        self._ground_normal = [0, -1]  # Normal vector of ground (points up)
+        self._slope_limit = 0.7  # Maximum slope the mob can walk on
+        
+    # EXISTING METHODS FROM ORIGINAL CLASS
     def get_position0(self):
         return self._position0
 
     def set_position0(self, x, y):
         self._position0 = (x, y)
-
-    def loop(self):
-        if self._apply_forces:
-            self.apply_physics()
-        else:
-            self.refresh_position()  # Original movement system
-        
-        self.image_animation_loop()
-        self.set_position0(*self.get_position())
 
     def get_name(self):
         return self._name
@@ -46,6 +44,12 @@ class Mob(Hitbox):
     def get_vitesse(self):
         return self._vitesse
     
+    def get_hitbox_size(self):
+        return super().get_hitbox_size()
+    
+    def get_position(self):
+        return self._position
+
     def set_position(self, x, y):
         self._position = (x, y)
         super().set_position(x, y)
@@ -66,10 +70,49 @@ class Mob(Hitbox):
         self.get_image().kill()
         del self
 
+    # ORIGINAL MOVEMENT METHODS
+    def refresh_position(self):
+        if self._destination is None:
+            return
+        
+        print(f"{self._name} position: {self._position}")
+        
+        x0, y0 = self._position
+        dest_x, dest_y = self._destination
+        
+        x = self.axis_move(x0, dest_x)
+        y = self.axis_move(y0, dest_y)
+        self.set_position(x, y)
+
+        if (x, y) == self._destination:
+            self.stop()
+        
+    def axis_move(self, axis, axis_dest):
+        if axis < axis_dest:
+            axis += self._vitesse
+            if axis > axis_dest:
+                axis = axis_dest
+        elif axis > axis_dest:
+            axis -= self._vitesse
+            if axis < axis_dest:
+                axis = axis_dest
+        return axis
+
+    def loop(self):
+        if self._apply_forces:
+            self.apply_physics()
+            self.check_ground_collision()  # Check for ground continuously
+        else:
+            self.refresh_position()
+        
+        self.image_animation_loop()
+        self.set_position0(*self.get_position())
+        self.check_edges()
+
     # PHYSICS METHODS
     def apply_physics(self):
         """Apply physics calculations including gravity and movement"""
-        # Apply gravity if enabled
+        # Apply gravity if enabled and not grounded
         if self._gravity_enabled and not self._is_grounded:
             self._acceleration[1] += self._gravity
         
@@ -81,9 +124,8 @@ class Mob(Hitbox):
         if not self._is_grounded:
             self._velocity[0] *= self._air_resistance
             self._velocity[1] *= self._air_resistance
-        
-        # Apply friction when grounded
-        if self._is_grounded:
+        else:
+            # Apply friction when grounded
             self._velocity[0] *= self._friction
         
         # Limit fall speed (terminal velocity)
@@ -94,34 +136,20 @@ class Mob(Hitbox):
         new_x = self._position[0] + self._velocity[0]
         new_y = self._position[1] + self._velocity[1]
         
-        # Check for collisions before moving
+        # Store old position for collision detection
         old_position = self._position
         self.set_position(new_x, new_y)
         
-        # Handle wall collisions
-        if self.is_colliding_with_walls():
-            # Restore old position
-            self.set_position(*old_position)
-            
-            # Bounce or stop based on collision
-            colliding = self.get_colliding_hitboxes()
-            for hb in colliding:
-                if isinstance(hb.get_source(), Wall):
-                    # Simple collision response - reverse velocity
-                    self._velocity[0] *= -0.5  # Bounce with energy loss
-                    self._velocity[1] *= -0.5
-                    
-                    # Check if we're on ground (collision from top)
-                    if old_position[1] < self._position[1]:
-                        self._is_grounded = True
-                        self._velocity[1] = 0  # Stop vertical movement
-                    break
+        # Check for collisions
+        if self.is_colliding():
+            self.handle_collision(old_position)
         
         # Reset acceleration for next frame
         self._acceleration = [0.0, 0.0]
         
-        # Reset grounded status (will be set again if collision occurs)
-        self._is_grounded = False
+        # Reset grounded status (will be updated in check_ground_collision)
+        if not self._is_grounded or abs(self._velocity[1]) > 0.1:
+            self._is_grounded = False
 
     def apply_force(self, fx, fy):
         """Apply a force to the mob (force = mass * acceleration)"""
@@ -135,12 +163,12 @@ class Mob(Hitbox):
         self._velocity = [vx, vy]
 
     def jump(self, power=None):
-        """Make the mob jump"""
+        """Make the mob jump - requires being on ground"""
         if not self._is_grounded:
-            return False  # Can't jump in air (optional: allow double jump)
+            return False
         
         jump_strength = power if power is not None else self._jump_power
-        self._velocity[1] = -jump_strength  # Negative Y is up
+        self._velocity[1] = -jump_strength
         self._is_grounded = False
         return True
 
@@ -197,7 +225,172 @@ class Mob(Hitbox):
         self._velocity = [0.0, 0.0]
         self._acceleration = [0.0, 0.0]
 
-    # EXISTING METHODS (updated for physics)
+    # GROUND COLLISION METHODS
+    def check_ground_collision(self):
+        """Check if the mob is standing on ground"""
+        # Only check if we're falling or standing
+        if self._velocity[1] >= 0:  # Falling or stationary
+            # Create a small hitbox below the mob to check for ground
+            feet_position = (self._position[0], self._position[1] + self.get_hitbox_size()[1]/2 + self._ground_check_offset)
+            feet_size = (self.get_hitbox_size()[0], self._ground_check_offset * 2)
+            
+            # Temporarily create a hitbox to check for collisions
+            temp_hitbox = Hitbox(feet_position, feet_size)
+            nearby = temp_hitbox.nearby()
+            
+            for hb in nearby:
+                source = hb.get_source()
+                # Check if it's ground
+                if hasattr(source, '_is_ground') and source._is_ground:
+                    # Check if we're actually above the ground
+                    mob_bottom = self._position[1] + self.get_hitbox_size()[1]/2
+                    ground_top = hb.get_position()[1] - hb.get_hitbox_size()[1]/2
+                    
+                    if mob_bottom <= ground_top + self._ground_check_offset:
+                        self._is_grounded = True
+                        # Snap to ground surface
+                        if self._velocity[1] > 0:  # Only snap if falling
+                            new_y = ground_top - self.get_hitbox_size()[1]/2
+                            self.set_position(self._position[0], new_y)
+                            self._velocity[1] = 0
+                        return True
+        return False
+
+    def handle_collision(self, old_position):
+        """Handle collisions with walls and ground"""
+        colliding = self.get_colliding_hitboxes()
+        
+        for hb in colliding:
+            source = hb.get_source()
+            
+            # Handle Ground collisions
+            if hasattr(source, '_is_ground') and source._is_ground:
+                self.handle_ground_collision(hb, old_position)
+            
+            # Handle Wall collisions
+            elif hasattr(source, '_is_wall') and source._is_wall:
+                self.handle_wall_collision(hb, old_position)
+            
+            # Handle other Mob collisions
+            elif isinstance(source, Mob):
+                self.handle_mob_collision(hb, old_position)
+
+    def handle_ground_collision(self, ground_hitbox, old_position):
+        """Handle collision with ground"""
+        mob_left = self._position[0] - self.get_hitbox_size()[0]/2
+        mob_right = self._position[0] + self.get_hitbox_size()[0]/2
+        mob_top = self._position[1] - self.get_hitbox_size()[1]/2
+        mob_bottom = self._position[1] + self.get_hitbox_size()[1]/2
+        
+        ground_left = ground_hitbox.get_position()[0] - ground_hitbox.get_hitbox_size()[0]/2
+        ground_right = ground_hitbox.get_position()[0] + ground_hitbox.get_hitbox_size()[0]/2
+        ground_top = ground_hitbox.get_position()[1] - ground_hitbox.get_hitbox_size()[1]/2
+        ground_bottom = ground_hitbox.get_position()[1] + ground_hitbox.get_hitbox_size()[1]/2
+        
+        # Determine collision side
+        overlap_left = mob_right - ground_left
+        overlap_right = ground_right - mob_left
+        overlap_top = mob_bottom - ground_top
+        overlap_bottom = ground_bottom - mob_top
+        
+        # Find minimum overlap
+        min_overlap = min(overlap_left, overlap_right, overlap_top, overlap_bottom)
+        
+        if min_overlap == overlap_top:  # Hitting ground from above
+            # Snap to ground surface
+            self.set_position(self._position[0], ground_top - self.get_hitbox_size()[1]/2)
+            self._is_grounded = True
+            self._velocity[1] = 0  # Stop falling
+            
+        elif min_overlap == overlap_bottom:  # Hitting ground from below
+            self.set_position(self._position[0], ground_bottom + self.get_hitbox_size()[1]/2)
+            self._velocity[1] = 0  # Stop upward movement
+            
+        elif min_overlap == overlap_left:  # Hitting ground from left
+            self.set_position(ground_left - self.get_hitbox_size()[0]/2, self._position[1])
+            self._velocity[0] = 0  # Stop horizontal movement
+            
+        elif min_overlap == overlap_right:  # Hitting ground from right
+            self.set_position(ground_right + self.get_hitbox_size()[0]/2, self._position[1])
+            self._velocity[0] = 0  # Stop horizontal movement
+
+    def handle_wall_collision(self, wall_hitbox, old_position):
+        """Handle collision with walls"""
+        # Restore old position
+        self.set_position(*old_position)
+        
+        # Simple bounce with energy loss
+        self._velocity[0] *= -0.3
+        self._velocity[1] *= -0.3
+
+    def handle_mob_collision(self, mob_hitbox, old_position):
+        """Handle collision with other mobs"""
+        # Optional: add mob-to-mob collision response
+        pass
+
+    def move(self, dx, dy):
+        """Move the mob with ground awareness"""
+        if self._apply_forces:
+            # Apply horizontal force for physics-based movement
+            self.apply_force(dx * self._mass, 0)
+        else:
+            # Original movement system
+            if dx != 0 or dy != 0:
+                new_x = self._position[0] + dx * self._vitesse
+                new_y = self._position[1] + dy * self._vitesse
+                self.set_position(new_x, new_y)
+
+    # GROUND INTERACTION METHODS
+    def get_ground_normal(self):
+        """Get the normal vector of the ground we're standing on"""
+        return self._ground_normal.copy()
+    
+    def set_ground_check_offset(self, offset):
+        """Set how far below to check for ground"""
+        self._ground_check_offset = offset
+    
+    def can_walk_on_slope(self, slope_x):
+        """Check if mob can walk on a given slope"""
+        return abs(slope_x) <= self._slope_limit
+    
+    def set_slope_limit(self, limit):
+        """Set maximum walkable slope (0.0 to 1.0)"""
+        self._slope_limit = max(0.0, min(1.0, limit))
+
+    # HITBOX METHODS
+    def is_colliding(self):
+        colliding = self.get_colliding_hitboxes()
+        if len(colliding) > 0:
+            return True
+        return False
+    
+    def get_colliding_hitboxes(self):
+        colliding = []
+        nearby_hitboxes = self.nearby()
+        for hb in nearby_hitboxes:
+            if hb.get_source() != self:
+                colliding.append(hb)
+        return colliding
+    
+    def is_colliding_with_walls(self):
+        """Check if colliding with walls (not ground)"""
+        colliding = self.get_colliding_hitboxes()
+        for hb in colliding:
+            source = hb.get_source()
+            if hasattr(source, '_is_wall') and source._is_wall:
+                return True
+        return False
+    
+    def is_colliding_with_ground(self):
+        """Check if colliding with ground"""
+        colliding = self.get_colliding_hitboxes()
+        for hb in colliding:
+            source = hb.get_source()
+            if hasattr(source, '_is_ground') and source._is_ground:
+                return True
+        return False
+
+    # ANIMATION METHOD
     def image_animation_loop(self):
         image = self.get_image()
         if image is None:
@@ -219,24 +412,34 @@ class Mob(Hitbox):
         
         image.set_movement_tilt(dx, dy)
 
-    # Hitbox methods remain the same...
-    def is_colliding(self):
-        colliding = self.get_colliding_hitboxes()
-        if len(colliding) > 0:
-            return True
-        return False
-    
-    def get_colliding_hitboxes(self):
-        colliding = []
-        nearby_hitboxes = self.nearby()
-        for hb in nearby_hitboxes:
-            if hb.get_source() != self:
-                colliding.append(hb)
-        return colliding
-    
-    def is_colliding_with_walls(self):
-        colliding = self.get_colliding_hitboxes()
-        for hb in colliding:
-            if isinstance(hb.get_source(), Wall):
-                return True
-        return False
+    # detections de coinsz
+    def check_edges(self):
+        x, y = self._position
+        w, h = self.get_hitbox_size()
+        
+        left = x - w/2
+        right = x + w/2
+        top = y - h/2
+        bottom = y + h/2
+        
+        if left <= 0:
+            self.on_y_edge()
+            # self.play_sound("edge_left")
+        
+        if right >= WIDTH:
+            self.on_y_edge()
+            # self.play_sound("edge_right")
+        
+        if top <= 0:
+            self.on_x_edge()
+            # self.play_sound("edge_top")
+        
+        if bottom >= HEIGHT:
+            self.on_x_edge()
+            # self.play_sound("edge_bottom")
+
+    def on_x_edge(self):
+        pass
+
+    def on_y_edge(self):
+        pass
