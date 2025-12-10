@@ -2,7 +2,7 @@ from main.rules.rule import Rule
 from main.score.score import Score
 import random
 
-class Orage(rule.Rule):
+class Orage(Rule):
 
     def __init__(self):
         super().__init__("Orage", "tout le monde perds des points" )
