@@ -1,5 +1,4 @@
-from main.rules.rule import Rule
-from main.rules.rule_list import add_rule
+from rule import Rule
 from main.score.score import Score
 class score2x(Rule):
 
@@ -14,4 +13,3 @@ class score2x(Rule):
         Score.baseAddPoints *= 0.5
         super().on_remove()
 
-add_rule(score2x())

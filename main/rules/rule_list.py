@@ -5,16 +5,13 @@ import random
 
 list_rules = []
 
-def add_rule(rule):
-    """Ajoute une règle à la liste et appelle on_add"""
-    list_rules.append(rule)
-    rule.on_add()
+# Classe Rule importée depuis ton fichier rule.py
+from rule import Rule
 
 def load_rules():
     """
-    Importe automatiquement tous les fichiers Python du dossier rules_def.
-    Chaque fichier doit contenir une classe qui hérite de Rule et qui s'instancie elle-même
-    en appelant add_rule() à la fin du fichier.
+    Importe automatiquement tous les fichiers Python du dossier rules_def
+    et instancie toutes les classes héritant de Rule.
     """
     RULES_DIR = Path(__file__).parent / "rules_def"
 
@@ -25,7 +22,13 @@ def load_rules():
             module = importlib.util.module_from_spec(spec)
             spec.loader.exec_module(module)
 
-    print("Règles chargées :", [r._name for r in list_rules])
+            # Instancie automatiquement toutes les classes héritant de Rule
+            for attr_name in dir(module):
+                attr = getattr(module, attr_name)
+                if isinstance(attr, type) and issubclass(attr, Rule) and attr is not Rule:
+                    instance = attr()
+                    list_rules.append(instance)
+                    instance.on_add()  # si tu veux déclencher on_add automatiquement
 
 def get_random_rule():
     """Retourne une règle aléatoire"""
@@ -34,15 +37,16 @@ def get_random_rule():
     return random.choice(list_rules)
 
 def run_rule(rule):
-    """Exécute une règle (ici on affiche juste le nom et description)"""
+    """Exécute une règle"""
     print(f"Exécution de la règle : {rule._name}")
     print(f"Description : {rule._description}")
-    # L'effet réel se produit via on_add() déjà appelé lors de add_rule()
-
-# Exemple d'utilisation
 if __name__ == "__main__":
-    load_rules()
+    load_rules()  # charge toutes les règles
 
-    # Sélection aléatoire et exécution
+    print("Toutes les règles chargées :")
+    for r in list_rules:
+        print("-", r._name)
+
+    print("\nRègle aléatoire test :")
     rule = get_random_rule()
     run_rule(rule)
