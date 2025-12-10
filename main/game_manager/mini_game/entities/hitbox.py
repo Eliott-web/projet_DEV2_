@@ -44,6 +44,7 @@ class Hitbox:
     
     def kill(self):
         # Clean up resources, unregister from hitbox manager, etc.
+        self.get_image().kill()
         del self
 
     @staticmethod
