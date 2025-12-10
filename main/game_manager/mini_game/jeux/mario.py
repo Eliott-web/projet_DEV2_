@@ -28,7 +28,7 @@ class MiniGameMario(MiniGame, ControlTypeSpace):
     def ajouterKoopa(self):
         koopa = Koopa(self.getCenterXY())
         self.add_mob(koopa)
-        koopa.set_destination_relative(300, 500)  # Déplace la koopa vers le bas
+        koopa.apply_force(0,-15)  # Appliquer une force initiale vers le haut
 
     def loop(self): # boucle de jeu si vous en avez besoin de customiser
 

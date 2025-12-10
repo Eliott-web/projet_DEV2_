@@ -22,3 +22,4 @@ plat.setPion(pion)
 step = lancer_de()
 movePion(plat, step)
 initGamePlay(plat)
+'''

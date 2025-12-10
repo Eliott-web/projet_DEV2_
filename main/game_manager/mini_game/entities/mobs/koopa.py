@@ -8,7 +8,8 @@ class Koopa(Mob):
         vitesse = 20
         size = 128
         hitbox_size = (size, size)
-        super().__init__(name, vitesse, position, hitbox_size)
+        gravity = 0
+        super().__init__(name, vitesse, position, hitbox_size,gravity)
 
         sprite = ImageWidget("assets/mobs/koopa.png", position, hitbox_size, 
             anchor="center", on_click=lambda w: None)
