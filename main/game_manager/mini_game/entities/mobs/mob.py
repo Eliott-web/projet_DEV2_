@@ -49,6 +49,9 @@ class Mob(Hitbox):
     
     def get_position(self):
         return self._position
+    
+    def set_vitesse(self, vitesse):
+        self._vitesse = vitesse
 
     def set_position(self, x, y):
         self._position = (x, y)
@@ -74,8 +77,6 @@ class Mob(Hitbox):
     def refresh_position(self):
         if self._destination is None:
             return
-        
-        print(f"{self._name} position: {self._position}")
         
         x0, y0 = self._position
         dest_x, dest_y = self._destination

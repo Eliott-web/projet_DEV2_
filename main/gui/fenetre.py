@@ -1,41 +1,73 @@
 import pygame
 import sys
 
-from main.main import widget_manager
-
-# Remove these duplicate imports since they're already in the class definitions
-# from main.gui.fenetre import WIDTH, add_image
-# from main.gui.widget.image import ImageWidget
-# from main.main import widget_manager
-# from ..controls.control_type_space import ControlTypeSpace
-# from ..mini_game import MiniGame
-# from ..entities.mobs.mob import Mob
-
 fps = 60
 refreshDelay = 1 / fps
 
 pygame.init()
 
-# --- Configuration écran ---
+# Get screen info BEFORE checking GUI mode
 info = pygame.display.Info()
 WIDTH, HEIGHT = info.current_w, info.current_h
-screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.NOFRAME)
-pygame.display.set_caption("Fenêtre borderless")
+
+# Initialize screen as None initially
+screen = None
 
 def start():
-    screen.fill((0,0,0))
-    '''
-    # Create and start the mini-game
-    mini_game = MiniGameMario()
-    mini_game.start()  # This will add the ImageWidget
-    '''
-    loop()  # Start the main loop
+    from main.main import isGuiMode
 
-def loop():
+    global screen
+    
+    if isGuiMode():
+        # Create window only if GUI mode is enabled
+        screen = pygame.display.set_mode((WIDTH, HEIGHT), 0)
+        pygame.display.set_caption("Fenêtre borderless")
+        screen.fill((0,0,0))
+        loop()  # Start the main loop with display
+    else:
+        # Run in headless/background mode
+        print(f"Running in background mode. Screen resolution: {WIDTH}x{HEIGHT}")
+        background_loop()
+
+def background_loop():
+    """Run the application without displaying a window"""
     clock = pygame.time.Clock()
     running = True
     
     while running:
+        dt = clock.tick(fps) / 1000.0
+        
+        # Handle events (minimal event checking in background)
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    running = False
+        
+        # Update widgets even without display
+        from main.main import widget_manager
+        widget_manager.update_all(dt)
+
+        widget_manager.draw_all(screen)
+        
+        # No drawing needed in background mode
+        
+        # Optional: Reduce CPU usage when idle
+        # if not widget_manager.has_active_widgets():
+        #     pygame.time.wait(10)
+    
+    # Clean shutdown
+    pygame.quit()
+    sys.exit()
+
+def loop():
+    """Original main loop with display"""
+    clock = pygame.time.Clock()
+    running = True
+    
+    while running:
+        from main.main import widget_manager
         dt = clock.tick(fps) / 1000.0
         
         # Handle events
