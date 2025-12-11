@@ -1,9 +1,6 @@
 import pygame
 import sys
 
-from main.main import widget_manager
-from main.main import isGuiMode
-
 fps = 60
 refreshDelay = 1 / fps
 
@@ -17,6 +14,8 @@ WIDTH, HEIGHT = info.current_w, info.current_h
 screen = None
 
 def start():
+    from main.main import isGuiMode
+
     global screen
     
     if isGuiMode():
@@ -47,6 +46,7 @@ def background_loop():
                     running = False
         
         # Update widgets even without display
+        from main.main import widget_manager
         widget_manager.update_all(dt)
 
         widget_manager.draw_all(screen)
@@ -67,6 +67,7 @@ def loop():
     running = True
     
     while running:
+        from main.main import widget_manager
         dt = clock.tick(fps) / 1000.0
         
         # Handle events

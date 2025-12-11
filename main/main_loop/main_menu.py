@@ -1,6 +1,6 @@
 import threading
 
-from main.plateau import plateau
+from main import main
 
 
 class MainMenu():
@@ -25,10 +25,14 @@ class MainMenu():
         return self._mobs
     
     def getPlateau(self):
-        return plateau
+        return main.plateau
     
     def ajouterMob(self):
         self._mobs
+
+    def getCenterXY(self):
+        from main.gui.fenetre import HEIGHT, WIDTH
+        return (WIDTH // 2, HEIGHT // 2)
     
     def loop(self):
 
