@@ -1,6 +1,6 @@
-from .. import rule
-from score.score import Score
-class score2x(rule.Rule):
+from rule import Rule
+from main.score.score import Score
+class score2x(Rule):
 
     def __init__(self):
         super().__init__("Score x2", "Double les points gagnés")
@@ -13,4 +13,3 @@ class score2x(rule.Rule):
         Score.baseAddPoints *= 0.5
         super().on_remove()
 
-    
