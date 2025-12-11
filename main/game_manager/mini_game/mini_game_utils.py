@@ -7,4 +7,5 @@ def getMiniGameList():
     from .jeux.garage import MiniGameGarage
     # This function would return a list of available mini-games
     # For simplicity, we return an empty list here
-    return {"mario": MiniGameMario(),"parking":MiniGameGarage()}
+    return {"mario": MiniGameMario(),
+            "parking":MiniGameGarage()}
