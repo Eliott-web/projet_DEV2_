@@ -1,10 +1,17 @@
-from ..controls.control_type_zqsd import ControlTypeZqsd
-from ..mini_game import MiniGame
+from projet_DEV2_.main.game_manager.mini_game.controls.control_type_zqsd import ControlTypeZqsd
+from projet_DEV2_.main.game_manager.mini_game.entities.mobs.voiture import Car
+from projet_DEV2_.main.game_manager.mini_game.entities.objets.parking import Parking
+from projet_DEV2_.main.game_manager.mini_game.mini_game import MiniGame
 
+
+voitureVitesse = 25
 class MiniGameGarage(MiniGame, ControlTypeZqsd):
 
     def __init__(self):
         super().__init__("Parking Challenge", "Garez la voiture sur la place marquée !")
+
+        self.car = None
+        self.Ground = True
 
         # Taille de la grille
         self._width = 10
@@ -37,34 +44,90 @@ class MiniGameGarage(MiniGame, ControlTypeZqsd):
             return False
         return self._car_x == self._target_x and self._car_y == self._target_y
 
-    # -----------------------
-    #     COLLISION
-    # -----------------------
+    def start(self):
+        self.ajouterObjet()
+        super().start()
+
+    def ajouterObjet(self):
+        self.afficher_fond()
+        self.ajouterAntiter()
+
+    def ajouterAntiter(self):
+        car = Car(self.getCenterXY())
+        self.car = car
+        self.add_mob(car)
+
+    def afficher_fond(self):
+        center = self.getCenterXY()
+
+        x_parking = center[0] + 800
+        y_parking = center[1]
+        pos_parking = (x_parking, y_parking)
+
+        parking = Parking(pos_parking)
+        self.parking = parking
+        self.add_object(parking)
+
+    def up_pressed(self):
+        global voitureVitesse
+        car = self.car
+        car.set_velocity(0, -voitureVitesse)
+
+    def down_pressed(self):
+        global voitureVitesse
+        car = self.car
+        car.set_velocity(0, voitureVitesse)
+
+    def right_pressed(self):
+        global voitureVitesse
+        car = self.car
+        car.set_velocity(voitureVitesse, 0)
+
+    def left_pressed(self):
+        global voitureVitesse
+        car = self.car
+        car.set_velocity(-voitureVitesse, 0)
+
+    def poser_obstacle(self,  wall_y, wall_x):
+        center = self.getCenterXY()
+
+
+    def loop(self):
+        car = self.car
+        if car.get_has_touche_parking():
+            self.endInstantly(True)
+        super().loop()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     def checkCollision(self):
         if (self._car_x, self._car_y) in self._obstacles:
             print("💥 Collision avec un obstacle !")
             self._crashed = True
 
-    # -----------------------
-    #       CONTROLES
-    # -----------------------
 
-    def up_pressed(self):
-        self._car_y -= 1
-        self.checkCollision()
-
-    def down_pressed(self):
-        self._car_y += 1
-        self.checkCollision()
-
-    def left_pressed(self):
-        self._car_x -= 1
-        self.checkCollision()
-
-    def right_pressed(self):
-        self._car_x += 1
-        self.checkCollision()
 
     # -----------------------
     #   AFFICHAGE ASCII
@@ -102,10 +165,3 @@ class MiniGameGarage(MiniGame, ControlTypeZqsd):
     #        LOOP
     # -----------------------
 
-    def loop(self):
-        self.display_grid()
-
-        if self._crashed:
-            print("🚫 La voiture est détruite, vous avez perdu.")
-
-        super().loop()
