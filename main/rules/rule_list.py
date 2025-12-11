@@ -1,18 +1,14 @@
-import os
 import importlib.util
 from pathlib import Path
 import random
+from main.rules.rule import Rule
 
 list_rules = []
-
-# Classe Rule importée depuis ton fichier rule.py
-from rule import Rule
+active_rule = None  # règle actuellement active
+last_rule = None    # dernière règle tirée pour éviter répétition
 
 def load_rules():
-    """
-    Importe automatiquement tous les fichiers Python du dossier rules_def
-    et instancie toutes les classes héritant de Rule.
-    """
+
     RULES_DIR = Path(__file__).parent / "rules_def"
 
     for file in RULES_DIR.iterdir():
@@ -22,31 +18,49 @@ def load_rules():
             module = importlib.util.module_from_spec(spec)
             spec.loader.exec_module(module)
 
-            # Instancie automatiquement toutes les classes héritant de Rule
+            # Instancie toutes les classes héritant de Rule
             for attr_name in dir(module):
                 attr = getattr(module, attr_name)
                 if isinstance(attr, type) and issubclass(attr, Rule) and attr is not Rule:
                     instance = attr()
-                    list_rules.append(instance)
-                    instance.on_add()  # si tu veux déclencher on_add automatiquement
+                    list_rules.append(instance)  # ⚠️ on_add n'est pas appelé ici
 
 def get_random_rule():
-    """Retourne une règle aléatoire"""
+    """Retourne une règle aléatoire différente de la dernière tirée"""
+    global last_rule
+
     if not list_rules:
         raise Exception("Aucune règle chargée. Appelle load_rules() d'abord.")
-    return random.choice(list_rules)
+
+    if last_rule is None:
+        # Premier tirage → aucune contrainte
+        rule = random.choice(list_rules)
+        last_rule = rule.__class__
+        return rule
+
+    # On filtre par classe et non par instance
+    possible_rules = [r for r in list_rules if r.__class__ is not last_rule]
+
+    # S'il n'y a plus d'autre règle (cas 1 règle)
+    if not possible_rules:
+        possible_rules = list_rules
+
+    rule = random.choice(possible_rules)
+    last_rule = rule.__class__
+    return rule
 
 def run_rule(rule):
-    """Exécute une règle"""
-    print(f"Exécution de la règle : {rule._name}")
-    print(f"Description : {rule._description}")
-if __name__ == "__main__":
-    load_rules()  # charge toutes les règles
+    """Exécute une règle et désactive automatiquement l'ancienne"""
+    global active_rule
 
-    print("Toutes les règles chargées :")
-    for r in list_rules:
-        print("-", r._name)
+    # Désactive l'ancienne règle si elle existe
+    if active_rule is not None:
+        print(f"Désactivation de la règle précédente : {active_rule._name}")
+        active_rule.on_remove()
 
-    print("\nRègle aléatoire test :")
-    rule = get_random_rule()
-    run_rule(rule)
+    # Active la nouvelle règle
+    print(f"Exécution de la règle : {rule._name} - {rule._description}")
+    rule.on_add()
+
+    # Met à jour la règle active
+    active_rule = rule
