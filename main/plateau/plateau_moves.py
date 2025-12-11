@@ -13,8 +13,9 @@ def movePionOnPath(pion, path, steps):
     reachedEnd = False
     plateau = pion.getPlateau
 
-    if posMax <= new_position:
-        new_position = posMax
+    # Clamp new_position to be within [0, posMax]
+    new_position = max(0, min(new_position, posMax))
+    if new_position == posMax:
         reachedEnd = True
     
     pion.setCase(new_position)
@@ -34,9 +35,6 @@ def showPionPosition(plateau):
     path = plateau.getPathArray[pion.getPath]
     current_position = pion.getCase
     posMax = path.getLength - 1
-    score = pion.getScore
-    score.ajouterPoints()  # Ajouter 1 point à chaque déplacement
-    score.afficherScore()
 
     # sécurité sur les bornes
     length = posMax + 1

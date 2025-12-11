@@ -15,7 +15,7 @@ class PionEntity(Mob):
         
         # IMPORTANT: Enable physics BEFORE setting image
         
-        sprite = ImageWidget("assets/mobs/mario.png", position, hitbox_size, 
+        sprite = ImageWidget("assets/mobs/pion.png", position, hitbox_size, 
             anchor="center", on_click=lambda w: None)
         self.set_image(sprite)
         self._apply_forces  = False

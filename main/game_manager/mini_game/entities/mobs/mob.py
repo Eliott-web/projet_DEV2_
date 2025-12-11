@@ -78,8 +78,6 @@ class Mob(Hitbox):
         if self._destination is None:
             return
         
-        print(f"{self._name} position: {self._position}")
-        
         x0, y0 = self._position
         dest_x, dest_y = self._destination
         

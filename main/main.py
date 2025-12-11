@@ -23,7 +23,7 @@ def isGuiMode():
 
 def buildPlateau():
     path = makePathLength(10)
-    plateau.setPathArray(path)
+    plateau.addPath(path)
     plateau.setPion(Pion())
 
 

@@ -7,7 +7,7 @@ class CaseEntity(Mob):
 
     def __init__(self, position):
         name = "Case"
-        vitesse = 10
+        vitesse = 20
         size = 265
         hitbox_size = (size, size)
         gravity = 0.0
@@ -15,7 +15,7 @@ class CaseEntity(Mob):
         
         # IMPORTANT: Enable physics BEFORE setting image
         
-        sprite = ImageWidget("assets/mobs/mario.png", position, hitbox_size, 
+        sprite = ImageWidget("assets/mobs/case.png", position, hitbox_size, 
             anchor="center", on_click=lambda w: None)
         self.set_image(sprite)
         self._apply_forces  = False
