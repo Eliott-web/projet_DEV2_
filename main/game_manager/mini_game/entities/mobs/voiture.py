@@ -1,6 +1,7 @@
-from main.game_manager.mini_game.entities.mobs.koopa import Koopa
-from main.game_manager.mini_game.entities.mobs.mob import Mob
 from main.gui.widget.image import ImageWidget
+from .mob import Mob
+
+from projet_DEV2_.main.game_manager.mini_game.entities.objets.parking import Parking
 
 
 class Car(Mob):
@@ -25,6 +26,7 @@ class Car(Mob):
         self.set_velocity(0, 0)
         self.set_max_fall_speed(80)  # Limit falling speed
         self._air_resistance = 0.7
+        self.is_parking = False
 
 
     def loop(self):
@@ -33,10 +35,14 @@ class Car(Mob):
         super().loop()
 
     def on_collision(self):
-        if True:
-            return
         # Gérer la collision avec d'autres entités si nécessaire
         collections = self.get_colliding_hitboxes()
         for entity in collections:
-            if isinstance(entity, Koopa):
-                self.touched_koopa()
+            if isinstance(entity, Parking):
+                self.touche_parking()
+
+    def touche_parking(self):
+        self.is_parking = True
+
+    def get_has_touche_parking(self):
+        return self.is_parking

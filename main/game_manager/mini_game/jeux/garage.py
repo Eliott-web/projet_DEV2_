@@ -3,6 +3,7 @@ from projet_DEV2_.main.game_manager.mini_game.entities.mobs.voiture import Car
 from projet_DEV2_.main.game_manager.mini_game.entities.objets.parking import Parking
 from projet_DEV2_.main.game_manager.mini_game.mini_game import MiniGame
 
+
 voitureVitesse = 25
 class MiniGameGarage(MiniGame, ControlTypeZqsd):
 
@@ -59,7 +60,7 @@ class MiniGameGarage(MiniGame, ControlTypeZqsd):
     def afficher_fond(self):
         center = self.getCenterXY()
 
-        x_parking = center[0] + 100
+        x_parking = center[0] + 800
         y_parking = center[1]
         pos_parking = (x_parking, y_parking)
 
@@ -87,8 +88,15 @@ class MiniGameGarage(MiniGame, ControlTypeZqsd):
         car = self.car
         car.set_velocity(-voitureVitesse, 0)
 
+    def poser_obstacle(self,  wall_y, wall_x):
+        center = self.getCenterXY()
 
 
+    def loop(self):
+        car = self.car
+        if car.get_has_touche_parking():
+            self.endInstantly(True)
+        super().loop()
 
 
 
@@ -157,10 +165,3 @@ class MiniGameGarage(MiniGame, ControlTypeZqsd):
     #        LOOP
     # -----------------------
 
-    def loop(self):
-        self.display_grid()
-
-        if self._crashed:
-            print("🚫 La voiture est détruite, vous avez perdu.")
-
-        super().loop()
