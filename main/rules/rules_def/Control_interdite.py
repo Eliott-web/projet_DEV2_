@@ -1,4 +1,4 @@
-from rule import Rule
+from main.rules.rule import Rule
 from main.game_manager.mini_game.controls.control_type_zqsd import ControlTypeZqsd
 
 

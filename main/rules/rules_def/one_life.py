@@ -1,4 +1,4 @@
-from rule import Rule
+from main.rules.rule import Rule
 
 
 class on_life(Rule):

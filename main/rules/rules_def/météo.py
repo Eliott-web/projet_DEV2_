@@ -1,4 +1,4 @@
-from rule import Rule
+from main.rules.rule import Rule
 from main.score.score import Score
 import random
 
@@ -10,9 +10,9 @@ class Orage(Rule):
 
 
     def onAdd(self):
-       """"" perte = random.randint(1,10)
+        perte = random.randint(1,10)
         point_perdu = min(perte, Score.basePoints)
-        super().on_add(point_perdu)"""""
+        super().on_add(point_perdu)
 
 
     def onRemove(self):

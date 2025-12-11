@@ -1,4 +1,4 @@
-from rule import Rule
+from main.rules.rule import Rule
 from main.score.score import Score
 class score2x(Rule):
 
