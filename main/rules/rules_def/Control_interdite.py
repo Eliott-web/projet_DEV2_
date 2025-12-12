@@ -12,4 +12,3 @@ class toucheInterdite(Rule):
 
     def on_remove(self):
         pass
-

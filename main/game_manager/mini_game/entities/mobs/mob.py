@@ -71,7 +71,7 @@ class Mob(Hitbox):
 
     def kill(self):
         self.get_image().kill()
-        del self
+        super().kill()
 
     # ORIGINAL MOVEMENT METHODS
     def refresh_position(self):
@@ -369,16 +369,16 @@ class Mob(Hitbox):
         colliding = []
         nearby_hitboxes = self.nearby()
         for hb in nearby_hitboxes:
-            if hb.get_source() != self:
+            if hb != self:
                 colliding.append(hb)
         return colliding
     
     def is_colliding_with_walls(self):
         """Check if colliding with walls (not ground)"""
-        colliding = self.get_colliding_hitboxes()
-        for hb in colliding:
-            source = hb.get_source()
-            if hasattr(source, '_is_wall') and source._is_wall:
+        collections = self.get_colliding_hitboxes()
+        print(collections)
+        for entity in collections:
+            if isinstance(entity, Wall):
                 return True
         return False
     

@@ -13,6 +13,7 @@ class Mario(Mob):
         hitbox_size = (size, size)
         gravity = 2.0
         self._is_touching_koopa = False
+        self._is_invincible = True
         super().__init__(name, vitesse, position, hitbox_size, gravity)
         
         # IMPORTANT: Enable physics BEFORE setting image
@@ -30,12 +31,17 @@ class Mario(Mob):
         if self.is_grounded():
             self.apply_force(0, -31)  # Apply an upward force to jump
 
+    def set_invincible(self, invincible: bool):
+        self._is_invincible = invincible
+
     def loop(self):
         if self.is_colliding():
             self.on_collision()
         super().loop()
 
     def on_collision(self):
+        if self._is_invincible:
+            return
         # Gérer la collision avec d'autres entités si nécessaire
         collections = self.get_colliding_hitboxes()
         for entity in collections:
@@ -50,3 +56,6 @@ class Mario(Mob):
 
     def touched_koopa(self):
        self.set_touching_koopa(True)
+
+    def reset_touched_koopa(self):
+        self.set_touching_koopa(False)

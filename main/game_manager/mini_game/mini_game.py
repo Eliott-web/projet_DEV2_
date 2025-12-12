@@ -23,6 +23,7 @@ class MiniGame(ControlsGetter):
         self._cleanup_timer = None
         self._text_space = None
         self._text_end = None
+        self._loop_timer = None  # Track the loop timer to cancel it
 
     def __repr__(self):
         return f"Mini-jeu: {self._name} - {self._description}"
@@ -34,9 +35,9 @@ class MiniGame(ControlsGetter):
             anchor="center", on_click=lambda w: None)
 
     def stopStartText(self):
-        image = self._text_space
-        image.kill()
-        self._text_space = None
+        if self._text_space:
+            self._text_space.kill()
+            self._text_space = None
 
     def afficherEndText(self, win):
         image = None
@@ -49,9 +50,9 @@ class MiniGame(ControlsGetter):
         self._text_end = image
 
     def stopEndText(self):
-        image = self._text_end
-        image.kill()
-        self._text_end = None
+        if self._text_end:
+            self._text_end.kill()
+            self._text_end = None
 
     def start(self):
         """Load/init everything but don't run the main loop until Space is pressed."""
@@ -95,6 +96,10 @@ class MiniGame(ControlsGetter):
 
     def begin_loop(self):
         """Set started flag, reset timer and start the main loop."""
+        # Cancel any existing loop timer from previous game
+        if self._loop_timer:
+            self._loop_timer.cancel()
+            self._loop_timer = None
         self._hasStarted = True
         self.reset_timer()
         self.loop()
@@ -109,6 +114,11 @@ class MiniGame(ControlsGetter):
 
     def _initiate_end(self, success):
         """Stop gameplay and listeners immediately, then schedule cleanup."""
+        # Cancel the loop timer to stop the game loop
+        if self._loop_timer:
+            self._loop_timer.cancel()
+            self._loop_timer = None
+        
         # prevent further game activity
         self._endInstantly = True
         self._hasStarted = False
@@ -151,6 +161,13 @@ class MiniGame(ControlsGetter):
 
     def _finalize_end(self, success):
         """Kill/deload mobs and objects and print final result."""
+        from main import main
+        menu = main.mainMenu
+        menu.setPaused(False)
+        menu.set_can_press_key(True)
+        menu.miniGameEnded(success)
+
+
         self.stopEndText()
         # kill mobs and clear
     
@@ -192,6 +209,8 @@ class MiniGame(ControlsGetter):
             print(f"Félicitations! Vous avez réussi le mini-jeu: {self._name}")
         else:
             print(f"Vous avez échoué le mini-jeu: {self._name}. Essayez encore!")
+        
+        del self
 
     # -- Utilities / helpers --
     def getCenterXY(self):
@@ -252,4 +271,6 @@ class MiniGame(ControlsGetter):
 
         for mob in self._mobs:
             mob.loop()
-        threading.Timer(refreshDelay, self.loop).start() # Continue the loop
+        # Store timer reference so we can cancel it later
+        self._loop_timer = threading.Timer(refreshDelay, self.loop)
+        self._loop_timer.start()

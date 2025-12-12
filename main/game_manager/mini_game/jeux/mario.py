@@ -3,7 +3,6 @@ from main.game_manager.mini_game.entities.mobs.koopa import Koopa
 from main.game_manager.mini_game.entities.mobs.mario import Mario
 from main.game_manager.mini_game.entities.objets.ground import Ground
 from main.gui.widget.image import ImageWidget
-from main.main import widget_manager
 from ..controls.control_type_space import ControlTypeSpace
 from ..mini_game import MiniGame
 from ..entities.mobs.mob import Mob
@@ -17,15 +16,29 @@ class MiniGameMario(MiniGame, ControlTypeSpace):
         self._mario = None
     
     def winCondition(self):
-        return True
+        # Gagne si Mario n'a pas touché un Koopa
+        mario = self.getMario()
+        if mario is None:
+            return False
+        return not mario.has_touched_koopa()
 
-    def space_pressed(self):
-        self._jumps += 1
+    def load(self):
+        """Réinitialiser l'état du jeu"""
+        super().load()
+        self._jumps = 0
+        # Réinitialiser le flag de collision de Mario
+        if self._mario:
+            self._mario.set_touching_koopa(False)
 
     def start(self):
         print("Démarrage du mini-jeu Mario Jump!")
         self.ajouterObj()
         super().start()
+
+    def end(self, success):
+        self._mario._is_touching_koopa = False
+        print("Fin du mini-jeu Mario Jump!")
+        super().end(success)
 
     def ajouterObj(self):
         center = self.getCenterXY()
@@ -41,7 +54,9 @@ class MiniGameMario(MiniGame, ControlTypeSpace):
         koopa2.set_sens_inverse(True)
         koopa_size_y = koopa1.get_hitbox_size()[1]
 
-        mario = Mario((center[0], koopa_y))
+        # Mario should be positioned above the koopas, on the platform
+        mario_y = koopa_y - 100
+        mario = Mario((center[0], mario_y))
         self.add_mob(mario)
         self._mario = mario
 
@@ -88,14 +103,28 @@ class MiniGameMario(MiniGame, ControlTypeSpace):
     def getMario(self):
         return self._mario
     
-    def loop(self): # boucle de jeu si vous en avez besoin de customiser
+    def loop(self): # boucle de jeu si vous en avez besoin de customizer
         mario = self.getMario()
+        self.setMarioVincible()
         if mario.has_touched_koopa():
+            print("Mario a touché une Koopa! Défaite.")
             self.endInstantly(False)
         #print(f"Jump! Total jumps: {self._jumps}") # truc custom
 
         super().loop()
 
+    def setMarioVincible(self):
+        mario = self.getMario()
+        if self.getTimer() > 1.0:
+            mario.set_invincible(False)
+        else:
+            mario.reset_touched_koopa()
+
     def space_pressed(self):
+        self._jumps += 1
         mario = self.getMario()
         mario.jump()
+
+    def begin_loop(self):
+        self._mario.reset_touched_koopa()
+        super().begin_loop()

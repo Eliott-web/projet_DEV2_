@@ -1,11 +1,11 @@
 from main.game_manager.mini_game.entities.mobs.mob import Mob
-from main.gui.widget.image import ImageWidget
 
 
 class Koopa(Mob):
     motion_speed = 50  # Vitesse de déplacement horizontale
 
     def __init__(self, position):
+        from main.gui.widget.image import ImageWidget
         name = "Koopa"
         vitesse = 20
         size = 128

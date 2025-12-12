@@ -1,10 +1,13 @@
-from projet_DEV2_.main.game_manager.mini_game.controls.control_type_zqsd import ControlTypeZqsd
-from projet_DEV2_.main.game_manager.mini_game.entities.mobs.voiture import Car
-from projet_DEV2_.main.game_manager.mini_game.entities.objets.parking import Parking
-from projet_DEV2_.main.game_manager.mini_game.mini_game import MiniGame
+from main.game_manager.mini_game.controls.control_type_zqsd import ControlTypeZqsd
+from main.game_manager.mini_game.entities.mobs.voiture import Car
+from main.game_manager.mini_game.entities.objets.parking import Parking
+from main.game_manager.mini_game.entities.objets.wall import Wall
+from main.game_manager.mini_game.entities.objets.wall import Wall
+from main.game_manager.mini_game.mini_game import MiniGame
+from main.gui.widget.image import ImageWidget
 
 
-voitureVitesse = 25
+voitureVitesse = 30
 class MiniGameGarage(MiniGame, ControlTypeZqsd):
 
     def __init__(self):
@@ -33,16 +36,12 @@ class MiniGameGarage(MiniGame, ControlTypeZqsd):
             (4, 3)
         ]
 
-        self._crashed = False
-
     # -----------------------
     #   CONDITIONS VICTOIRE
     # -----------------------
 
     def winCondition(self):
-        if self._crashed:
-            return False
-        return self._car_x == self._target_x and self._car_y == self._target_y
+        return False
 
     def start(self):
         self.ajouterObjet()
@@ -50,23 +49,53 @@ class MiniGameGarage(MiniGame, ControlTypeZqsd):
 
     def ajouterObjet(self):
         self.afficher_fond()
-        self.ajouterAntiter()
+        self.afficher_obstacle(200, 400)
+        self.ajouterEntite()
 
-    def ajouterAntiter(self):
-        car = Car(self.getCenterXY())
+    def ajouterEntite(self):
+        posx = self.getCenterXY()[0] - 400
+        posy = self.getCenterXY()[1] + 300
+
+        car = Car((posx, posy))
         self.car = car
         self.add_mob(car)
 
     def afficher_fond(self):
         center = self.getCenterXY()
+        sky = ImageWidget("assets/background/parking_background.png",center,(center[0]*2,center[1]*2),
+                                      anchor="center",on_click=lambda w: None)
+        self.add_object(sky)
 
-        x_parking = center[0] + 800
-        y_parking = center[1]
+
+
+
+
+        center = self.getCenterXY()
+
+        x_parking = center[0] + 500
+        y_parking = center[1] + 300
         pos_parking = (x_parking, y_parking)
 
         parking = Parking(pos_parking)
         self.parking = parking
         self.add_object(parking)
+
+    def afficher_obstacle(self, wall_x, wall_y):
+        center = self.getCenterXY()
+
+        x_obstacle = center[0] + 200
+        y_obstacle = center[1] + 200
+        pos_obstacle = (x_obstacle, y_obstacle)
+        size_obstacle = (wall_x, wall_y)
+
+        # Créer et ajouter l'obstacle
+        obstacle = Wall(pos_obstacle, size_obstacle)  # Utiliser la classe Parking comme obstacle
+        image = ImageWidget("assets/background/wall.jpg",pos_obstacle,size=size_obstacle,
+                                      anchor="center",on_click=lambda w: None)
+        obstacle.set_image(image)
+        self.add_object(obstacle)
+
+    # voiture controls
 
     def up_pressed(self):
         global voitureVitesse
@@ -88,14 +117,13 @@ class MiniGameGarage(MiniGame, ControlTypeZqsd):
         car = self.car
         car.set_velocity(-voitureVitesse, 0)
 
-    def poser_obstacle(self,  wall_y, wall_x):
-        center = self.getCenterXY()
-
 
     def loop(self):
         car = self.car
         if car.get_has_touche_parking():
             self.endInstantly(True)
+            return
+        
         super().loop()
 
 

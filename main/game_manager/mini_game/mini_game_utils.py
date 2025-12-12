@@ -1,11 +1,15 @@
-def getMiniGameInstance(name, description):
-    from mini_game import MiniGame
-    return MiniGame(name, description)
+from main.game_manager.mini_game.jeux.garage import MiniGameGarage
+from main.game_manager.mini_game.jeux.mario import MiniGameMario
+
+
+game_suppliers = {
+    "mario": MiniGameMario,  # Just the class, not an instance
+    "parking": MiniGameGarage,
+}
+
+def getMiniGameInstance(name: str, description: str):
+    return game_suppliers[name](name, description)  # Creates NEW instance
 
 def getMiniGameList():
-    from .jeux.mario import MiniGameMario
-    from .jeux.garage import MiniGameGarage
-    # This function would return a list of available mini-games
-    # For simplicity, we return an empty list here
-    return {"mario": MiniGameMario(),
-            "parking":MiniGameGarage()}
+    return {name: cls() 
+            for name, cls in game_suppliers.items()}

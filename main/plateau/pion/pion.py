@@ -22,10 +22,14 @@ class Pion:
     def setPlateau(self, plateau):
         self._plateau = plateau
 
-    def ajouter_item(self, item):
+    def addItem(self, item):
 
         print(f"[Tu as obtenu : {item}]")
         self._inventaire.append(item)
+
+    def removeItem(self, item):
+        if item in self._inventaire:
+            self._inventaire.remove(item)
     
     def setScore(self, points):
         self._score = points

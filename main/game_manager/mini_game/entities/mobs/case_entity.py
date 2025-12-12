@@ -1,11 +1,11 @@
 from main.game_manager.mini_game.entities.mobs.koopa import Koopa
 from main.game_manager.mini_game.entities.mobs.mob import Mob
-from main.gui.widget.image import ImageWidget
 
 
 class CaseEntity(Mob):
 
-    def __init__(self, position):
+    def __init__(self, position, isShop: bool = False):
+        from main.gui.widget.image import ImageWidget
         name = "Case"
         vitesse = 20
         size = 265
@@ -15,7 +15,14 @@ class CaseEntity(Mob):
         
         # IMPORTANT: Enable physics BEFORE setting image
         
-        sprite = ImageWidget("assets/mobs/case.png", position, hitbox_size, 
+        texture = "assets/mobs/case.png"
+        if isShop:
+            texture = "assets/mobs/case_shop.png"
+        sprite = ImageWidget(texture, position, hitbox_size, 
             anchor="center", on_click=lambda w: None)
         self.set_image(sprite)
         self._apply_forces  = False
+        self._isShop = isShop
+
+    def isShop(self):
+        return self._isShop

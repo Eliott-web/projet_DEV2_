@@ -2,7 +2,7 @@ from main.rules.rule import Rule
 from main.plateau.die.die import lancer_de
 
 
-class TurBo(Rule):
+class Turbo(Rule):
 
     def __init__(self):
         super().__init__("Turbo tchikita","vous avancez en X2")

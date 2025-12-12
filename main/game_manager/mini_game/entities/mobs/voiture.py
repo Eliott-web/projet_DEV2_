@@ -1,7 +1,7 @@
 from main.gui.widget.image import ImageWidget
 from .mob import Mob
 
-from projet_DEV2_.main.game_manager.mini_game.entities.objets.parking import Parking
+from main.game_manager.mini_game.entities.objets.parking import Parking
 
 
 class Car(Mob):
@@ -10,22 +10,22 @@ class Car(Mob):
     def __init__(self, position):
         name = "Car"
         vitesse = 20
-        size = 128
-        hitbox_size = (size, size)
+        size = 128*1.5
+        hitbox_size = (size, size*0.7)
         gravity = 0
         super().__init__(name, vitesse, position, hitbox_size, gravity)
         
         # IMPORTANT: Enable physics BEFORE setting image
         self.enable_physics()
         
-        sprite = ImageWidget("assets/mobs/mario.png", position, hitbox_size, 
+        sprite = ImageWidget("assets/mobs/car.png", position, hitbox_size, 
             anchor="center", on_click=lambda w: None)
         self.set_image(sprite)
         
         # Initialize with zero velocity
         self.set_velocity(0, 0)
         self.set_max_fall_speed(80)  # Limit falling speed
-        self._air_resistance = 0.7
+        self._air_resistance = 0.9
         self.is_parking = False
 
 

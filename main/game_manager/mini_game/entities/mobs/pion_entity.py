@@ -1,11 +1,11 @@
 from main.game_manager.mini_game.entities.mobs.koopa import Koopa
 from main.game_manager.mini_game.entities.mobs.mob import Mob
-from main.gui.widget.image import ImageWidget
 
 
 class PionEntity(Mob):
 
     def __init__(self, position):
+        from main.gui.widget.image import ImageWidget
         name = "Pion"
         vitesse = 10
         size = 128

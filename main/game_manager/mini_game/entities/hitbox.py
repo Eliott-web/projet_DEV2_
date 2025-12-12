@@ -44,6 +44,9 @@ class Hitbox:
     
     def kill(self):
         # Clean up resources, unregister from hitbox manager, etc.
+        from .hitbox_manager import HitboxManager
+        HitboxManager.instance().unregister(self)
+        
         self.get_image().kill()
         del self
 
