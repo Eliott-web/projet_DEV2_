@@ -10,8 +10,13 @@ from main.game_manager.mini_game.controls.controls_getter import ControlsGetter
 from pynput import keyboard
 import threading
 
+from main.rules.rule_list import random_rule_event
+
+
+case_multiplicateur = 1
 case_bonus = 0
 case_offset = 300
+score_multiplicateur = 1
 class PlateauMenu(MainMenu, ControlsGetter):
 
     def __init__(self):
@@ -770,6 +775,124 @@ class PlateauMenu(MainMenu, ControlsGetter):
         self.ajouterObject(message)
         threading.Timer(2, message.kill).start()
 
+    # Gestion des règles
+    def ruleEvents(self):
+        """Applique un événement de règle aléatoire et affiche le résultat
+        
+        Returns:
+            tuple: (Rule, bool) - La règle et si elle a été ajoutée (True) ou retirée (False)
+                   ou (None, None) si aucune action
+        """
+        from main.rules.rule_list import random_rule_event
+        from main.gui.fenetre import WIDTH, HEIGHT
+        
+        rule, was_added = random_rule_event()
+        print(f"Règle événement : {rule}, Ajoutée : {was_added}")
+        
+        if rule is None:
+            return (None, None)
+        
+        # Déterminer le message et la couleur
+        if was_added:
+            action_text = "NOUVELLE RÈGLE AJOUTÉE !"
+            color = (100, 255, 100)  # Vert
+        else:
+            action_text = "RÈGLE RETIRÉE !"
+            color = (255, 100, 100)  # Rouge
+        
+        center_x = WIDTH // 2
+        center_y = HEIGHT // 2
+        
+        # Titre de l'action (ajoutée ou retirée)
+        title = TextWidget(
+            action_text,
+            font_size=48,
+            color=color,
+            pos=(center_x, center_y - 100),
+            anchor="center",
+            bold=True
+        )
+        self.ajouterObject(title)
+        
+        # Nom de la règle
+        rule_name = TextWidget(
+            rule.name,
+            font_size=42,
+            color=(255, 255, 255),
+            pos=(center_x, center_y - 20),
+            anchor="center",
+            bold=True
+        )
+        self.ajouterObject(rule_name)
+        
+        # Description de la règle
+        rule_description = TextWidget(
+            rule.description,
+            font_size=28,
+            color=(220, 220, 220),
+            pos=(center_x, center_y + 40),
+            anchor="center"
+        )
+        self.ajouterObject(rule_description)
+        
+        # Faire disparaître les widgets après 3.5 secondes
+        threading.Timer(3.5, title.kill).start()
+        threading.Timer(3.5, rule_name.kill).start()
+        threading.Timer(3.5, rule_description.kill).start()
+        
+        return (rule, was_added)
+    
+    def displayRemovedRule(self, rule):
+        """Affiche une règle qui vient d'être retirée
+        
+        Args:
+            rule: La règle retirée à afficher
+        """
+        if rule is None:
+            return
+        
+        from main.gui.fenetre import WIDTH, HEIGHT
+        
+        center_x = WIDTH // 2
+        center_y = HEIGHT // 2
+        
+        # Titre de l'action
+        title = TextWidget(
+            "RÈGLE RETIRÉE !",
+            font_size=48,
+            color=(255, 100, 100),  # Rouge
+            pos=(center_x, center_y - 100),
+            anchor="center",
+            bold=True
+        )
+        self.ajouterObject(title)
+        
+        # Nom de la règle
+        rule_name = TextWidget(
+            rule.name,
+            font_size=42,
+            color=(255, 255, 255),
+            pos=(center_x, center_y - 20),
+            anchor="center",
+            bold=True
+        )
+        self.ajouterObject(rule_name)
+        
+        # Description de la règle
+        rule_description = TextWidget(
+            rule.description,
+            font_size=28,
+            color=(220, 220, 220),
+            pos=(center_x, center_y + 40),
+            anchor="center"
+        )
+        self.ajouterObject(rule_description)
+        
+        # Faire disparaître les widgets après 3.5 secondes
+        threading.Timer(3.5, title.kill).start()
+        threading.Timer(3.5, rule_name.kill).start()
+        threading.Timer(3.5, rule_description.kill).start()
+
 
     def miniGameEnded(self, success: bool):
         self.setPaused(False)
@@ -777,10 +900,27 @@ class PlateauMenu(MainMenu, ControlsGetter):
         scoreVictoire = 5
         scoreDefaite = -3
 
-        if success:
-            self.addScore(scoreVictoire)
+        # Afficher la règle d'abord et récupérer le résultat
+        rule, was_added = self.ruleEvents()
+        print(f"Règle appliquée après mini-jeu : {rule}, Ajoutée : {was_added}")
+        
+        # Si une règle a été affichée, attendre avant le score
+        if rule is not None:
+            # Attendre 4 secondes avant d'afficher le score
+            # (3.5s pour lire la règle + 0.5s de pause)
+            def show_score():
+                if success:
+                    self.addScore(scoreVictoire)
+                else:
+                    self.addScore(scoreDefaite)
+            
+            threading.Timer(4, show_score).start()
         else:
-            self.addScore(scoreDefaite)
+            # Pas de règle, afficher le score immédiatement
+            if success:
+                self.addScore(scoreVictoire)
+            else:
+                self.addScore(scoreDefaite)
 
     # Actions du joueur
 
@@ -814,6 +954,7 @@ class PlateauMenu(MainMenu, ControlsGetter):
         de = self.jetDe()
 
         de += case_bonus
+        de *= case_multiplicateur
         case_bonus = 0
         
         movePion(self.getPlateau(), de)
@@ -853,8 +994,10 @@ class PlateauMenu(MainMenu, ControlsGetter):
         return pion.getInventaire
 
     def addScore(self, points):
+        global score_multiplicateur
+
         pion = self.getPlateau().getPion
-        new_score = pion.getScore + points
+        new_score = pion.getScore + points * score_multiplicateur
         if new_score < 0:
             self.initEnd(False)
         pion.setScore(new_score)
@@ -885,6 +1028,8 @@ class PlateauMenu(MainMenu, ControlsGetter):
         items = [RedBull(),Gomme()]
         return items
 
+
+
     def space_on_press(self):
         # Si l'inventaire est ouvert, utiliser l'item
         if self.inventoryOpen:
@@ -912,7 +1057,8 @@ class PlateauMenu(MainMenu, ControlsGetter):
         print("Touche 'I' pressée - Toggle boutique")
         self.toggleShop()
         return None
-    
+
+
     def on_press(self, key):
         if (self.isPaused() or not self.get_can_press_key()):
             return

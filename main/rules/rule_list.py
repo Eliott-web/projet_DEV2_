@@ -1,66 +1,83 @@
-import importlib.util
-from pathlib import Path
 import random
 from main.rules.rule import Rule
+from main.rules.rules_def.scorex2 import ScoreX2
+from main.rules.rules_def.turbo_tchikita import Turbo
 
 list_rules = []
-active_rule = None  # règle actuellement active
-last_rule = None    # dernière règle tirée pour éviter répétition
+list_available_rules = [ScoreX2(), Turbo()]
 
-def load_rules():
-
-    RULES_DIR = Path(__file__).parent / "rules_def"
-
-    for file in RULES_DIR.iterdir():
-        if file.suffix == ".py" and not file.name.startswith("__"):
-            module_name = file.stem
-            spec = importlib.util.spec_from_file_location(module_name, file)
-            module = importlib.util.module_from_spec(spec)
-            spec.loader.exec_module(module)
-
-            # Instancie toutes les classes héritant de Rule
-            for attr_name in dir(module):
-                attr = getattr(module, attr_name)
-                if isinstance(attr, type) and issubclass(attr, Rule) and attr is not Rule:
-                    instance = attr()
-                    list_rules.append(instance)  # ⚠️ on_add n'est pas appelé ici
-
-def get_random_rule():
-    """Retourne une règle aléatoire différente de la dernière tirée"""
-    global last_rule
-
-    if not list_rules:
-        raise Exception("Aucune règle chargée. Appelle load_rules() d'abord.")
-
-    if last_rule is None:
-        # Premier tirage → aucune contrainte
-        rule = random.choice(list_rules)
-        last_rule = rule.__class__
-        return rule
-
-    # On filtre par classe et non par instance
-    possible_rules = [r for r in list_rules if r.__class__ is not last_rule]
-
-    # S'il n'y a plus d'autre règle (cas 1 règle)
-    if not possible_rules:
-        possible_rules = list_rules
-
-    rule = random.choice(possible_rules)
-    last_rule = rule.__class__
-    return rule
-
-def run_rule(rule):
-    """Exécute une règle et désactive automatiquement l'ancienne"""
-    global active_rule
-
-    # Désactive l'ancienne règle si elle existe
-    if active_rule is not None:
-        print(f"Désactivation de la règle précédente : {active_rule._name}")
-        active_rule.on_remove()
-
-    # Active la nouvelle règle
-    print(f"Exécution de la règle : {rule._name} - {rule._description}")
+def add_rule(rule: Rule):
+    """Ajoute une règle à la liste active et la retire des règles disponibles"""
+    if rule in list_available_rules:
+        list_available_rules.remove(rule)
+    list_rules.append(rule)
     rule.on_add()
 
-    # Met à jour la règle active
-    active_rule = rule
+def remove_rule(rule: Rule):
+    """Retire une règle de la liste active et la remet dans les règles disponibles"""
+    if rule in list_rules:
+        list_rules.remove(rule)
+        rule.on_remove()
+        if rule not in list_available_rules:
+            list_available_rules.append(rule)
+
+def get_random_rule() -> Rule:
+    """Retourne une règle aléatoire parmi celles disponibles"""
+    if not list_available_rules:
+        return None
+    return random.choice(list_available_rules)
+
+def get_random_active_rule() -> Rule:
+    """Retourne une règle aléatoire parmi celles actives"""
+    if not list_rules:
+        return None
+    return random.choice(list_rules)
+
+def add_random_rule():
+    """Ajoute une règle aléatoire depuis les règles disponibles"""
+    rule = get_random_rule()
+    if rule:
+        add_rule(rule)
+
+def remove_random_rule():
+    """Retire une règle aléatoire depuis les règles actives"""
+    rule = get_random_active_rule()
+    if rule:
+        remove_rule(rule)
+
+def random_rule_event():
+    """Événement aléatoire qui ajoute ou retire une règle
+    - Si aucune règle disponible, force la suppression d'une règle active
+    - Si aucune règle active, force l'ajout d'une règle disponible
+    - Sinon, choix aléatoire entre ajouter ou retirer
+    
+    Returns:
+        tuple: (Rule, bool) - La règle affectée et True si ajoutée, False si retirée
+               ou (None, None) si aucune action n'a pu être effectuée
+    """
+    # Si aucune règle disponible, on doit obligatoirement retirer
+    if not list_available_rules and list_rules:
+        rule = get_random_active_rule()
+        if rule:
+            remove_rule(rule)
+            return (rule, False)
+    # Si aucune règle active, on doit obligatoirement ajouter
+    elif not list_rules and list_available_rules:
+        rule = get_random_rule()
+        if rule:
+            add_rule(rule)
+            return (rule, True)
+    # Sinon, choix aléatoire
+    elif list_available_rules and list_rules:
+        if random.choice([True, False]):
+            rule = get_random_rule()
+            if rule:
+                add_rule(rule)
+                return (rule, True)
+        else:
+            rule = get_random_active_rule()
+            if rule:
+                remove_rule(rule)
+                return (rule, False)
+    
+    return (None, None)

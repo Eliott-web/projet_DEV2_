@@ -1,15 +1,15 @@
+
 from main.rules.rule import Rule
-from main.score.score import Score
-class score2x(Rule):
+class ScoreX2(Rule):
 
     def __init__(self):
         super().__init__("Score x2", "Double les points gagnés")
 
     def on_add(self):
-        Score.baseAddPoints *= 2
-        super().on_add()
+        from main.main_loop import plateau_menu
+        plateau_menu.score_multiplicateur = 2
+        
 
     def on_remove(self):
-        Score.baseAddPoints *= 0.5
-        super().on_remove()
-
+        from main.main_loop import plateau_menu
+        plateau_menu.score_multiplicateur = 1
