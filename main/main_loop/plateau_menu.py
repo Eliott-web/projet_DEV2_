@@ -3,12 +3,14 @@ from main.game_manager.mini_game.entities.mobs.case_entity import CaseEntity
 from main.game_manager.mini_game.entities.mobs.pion_entity import PionEntity
 from main.game_manager.mini_game.entities.mobs.pion_entity import PionEntity
 from main.gui.widget.text import TextWidget
+from main.item.gomme import Gomme
 from main.item.redbull import RedBull
 from main.main_loop.main_menu import MainMenu
 from main.game_manager.mini_game.controls.controls_getter import ControlsGetter
 from pynput import keyboard
 import threading
 
+case_bonus = 0
 case_offset = 300
 class PlateauMenu(MainMenu, ControlsGetter):
 
@@ -23,6 +25,7 @@ class PlateauMenu(MainMenu, ControlsGetter):
         self.inventoryOpen = False
         self.inventoryWidgets = []
         self.inventoryHintText = None
+        self.shopHintText = None
         self.selectedInventoryItemIndex = 0
         self.shopOpen = False
         self.shopWidgets = []
@@ -125,7 +128,7 @@ class PlateauMenu(MainMenu, ControlsGetter):
         from main.gui.fenetre import WIDTH, HEIGHT
         # Afficher le texte au centre en bas de l'écran
         center_x = WIDTH // 2
-        center_y = HEIGHT - 100
+        center_y = HEIGHT - 200
         text = TextWidget(
             "Appuyez sur 'espace' pour lancer le dé !",
             font_size=36,
@@ -147,6 +150,18 @@ class PlateauMenu(MainMenu, ControlsGetter):
         self.ajouterObject(inventory_text)
         self.inventoryHintText = inventory_text
         
+        # Texte pour ouvrir le magasin (seulement si sur une case boutique)
+        if self.isOnShop():
+            shop_text = TextWidget(
+                "Appuyez sur 'I' pour ouvrir le magasin",
+                font_size=28,
+                color=(255, 215, 0),
+                pos=(center_x, center_y + 100),
+                anchor="center"
+            )
+            self.ajouterObject(shop_text)
+            self.shopHintText = shop_text
+        
         print("Appuyez sur 'Espace' pour lancer le dé et avancer le pion.")
 
     def removeIdleText(self):
@@ -156,6 +171,9 @@ class PlateauMenu(MainMenu, ControlsGetter):
         if self.inventoryHintText:
             self.inventoryHintText.kill()
             self.inventoryHintText = None
+        if self.shopHintText:
+            self.shopHintText.kill()
+            self.shopHintText = None
 
     def setDiceText(self, text):
         from main.gui.fenetre import WIDTH, HEIGHT
@@ -790,9 +808,13 @@ class PlateauMenu(MainMenu, ControlsGetter):
         return value
     
     def avancerPion(self):
+        global case_bonus
         from main.plateau.plateau_utils import movePion
 
         de = self.jetDe()
+
+        de += case_bonus
+        case_bonus = 0
         
         movePion(self.getPlateau(), de)
         self.updateScoreDisplay()
@@ -860,7 +882,7 @@ class PlateauMenu(MainMenu, ControlsGetter):
         return False
     
     def getBuyableItems(self):
-        items = [RedBull()]
+        items = [RedBull(),Gomme()]
         return items
 
     def space_on_press(self):

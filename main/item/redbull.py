@@ -10,5 +10,5 @@ class RedBull(Item):
         )
 
     def onUse(self):
-        """Utilisation de l'item Red Bull"""
-        pass
+        from main.main_loop.plateau_menu import case_bonus
+        case_bonus += 1
