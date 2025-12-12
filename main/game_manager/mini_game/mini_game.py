@@ -30,14 +30,42 @@ class MiniGame(ControlsGetter):
 
     # Public API
     def afficherStartText(self):
+        from main.gui.widget.text import TextWidget
         
+        # Image de fond
         self._text_space = ImageWidget("assets/gui/start.png", self.getCenterXY(), (1536/2,1024/2), 
             anchor="center", on_click=lambda w: None)
+        
+        # Texte avec le nom du mini-jeu
+        center_x, center_y = self.getCenterXY()
+        self._game_title = TextWidget(
+            self._name,
+            font_size=64,
+            color=(255, 255, 255),
+            pos=(center_x, 100),
+            anchor="center",
+            bold=True
+        )
+        
+        # Description du mini-jeu
+        self._game_description = TextWidget(
+            self._description,
+            font_size=36,
+            color=(255, 20, 147),  # Rose foncé
+            pos=(center_x, 150),
+            anchor="center"
+        )
 
     def stopStartText(self):
         if self._text_space:
             self._text_space.kill()
             self._text_space = None
+        if hasattr(self, '_game_title') and self._game_title:
+            self._game_title.kill()
+            self._game_title = None
+        if hasattr(self, '_game_description') and self._game_description:
+            self._game_description.kill()
+            self._game_description = None
 
     def afficherEndText(self, win):
         image = None
@@ -56,10 +84,8 @@ class MiniGame(ControlsGetter):
 
     def start(self):
         """Load/init everything but don't run the main loop until Space is pressed."""
-        print(f"Démarrage du mini-jeu (chargement): {self._name}")
         self.load()
         self.setup_start_listener()
-        print("Appuyez sur Espace pour démarrer le mini-jeu...")
         self.afficherStartText()
 
     def endInstantly(self, win: bool): # Si tu veux que ça se termine tout de suite victoire/défaite

@@ -11,7 +11,15 @@ guiMode = False
 
 def init():
     buildPlateau()
-    mainMenu.start()
+    
+    if guiMode:
+        # Mode GUI
+        mainMenu.start()
+    else:
+        # Mode Console
+        from main.console.console_game_manager import ConsoleGameManager
+        console_manager = ConsoleGameManager(plateau)
+        console_manager.start()
 
 def setGuiMod(gui):
     global guiMode
@@ -22,7 +30,9 @@ def isGuiMode():
     return guiMode
 
 def buildPlateau():
-    path = makePathLength(10)
+    # Mode console : 5 cases, Mode GUI : 15 cases
+    length = 5 if not guiMode else 15
+    path = makePathLength(length)
     plateau.addPath(path)
     plateau.setPion(Pion())
 

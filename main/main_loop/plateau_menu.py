@@ -166,8 +166,7 @@ class PlateauMenu(MainMenu, ControlsGetter):
             )
             self.ajouterObject(shop_text)
             self.shopHintText = shop_text
-        
-        print("Appuyez sur 'Espace' pour lancer le dé et avancer le pion.")
+
 
     def removeIdleText(self):
         if self.idleText:
@@ -180,7 +179,7 @@ class PlateauMenu(MainMenu, ControlsGetter):
             self.shopHintText.kill()
             self.shopHintText = None
 
-    def setDiceText(self, text):
+    def setDiceText(self, text, bonus=0, multiplicateur=1):
         from main.gui.fenetre import WIDTH, HEIGHT
         # Afficher le texte au centre en bas de l'écran
         center_x = WIDTH // 2
@@ -194,9 +193,29 @@ class PlateauMenu(MainMenu, ControlsGetter):
         )
         self.ajouterObject(dice_text)
         threading.Timer(2, dice_text.kill).start()
+        
+        # Afficher les bonus/multiplicateurs si actifs
+        bonus_messages = []
+        if multiplicateur > 1:
+            bonus_messages.append(f"×{multiplicateur} (Turbo Tchikita)")
+        if bonus > 0:
+            bonus_messages.append(f"+{bonus} (Red Bull)")
+        
+        if bonus_messages:
+            bonus_text = TextWidget(
+                " | ".join(bonus_messages),
+                font_size=36,
+                color=(255, 215, 0),
+                pos=(center_x, center_y + 80),
+                anchor="center",
+                bold=True
+            )
+            self.ajouterObject(bonus_text)
+            threading.Timer(2, bonus_text.kill).start()
 
     def setScoreChangeText(self, points):
         """Affiche un gros message temporaire pour annoncer le gain ou la perte de points"""
+        global score_multiplicateur
         from main.gui.fenetre import WIDTH, HEIGHT
         center_x = WIDTH // 2
         center_y = HEIGHT // 2
@@ -222,6 +241,19 @@ class PlateauMenu(MainMenu, ControlsGetter):
         )
         self.ajouterObject(score_text)
         threading.Timer(2.5, score_text.kill).start()
+        
+        # Afficher le multiplicateur si actif
+        if score_multiplicateur > 1:
+            multiplier_text = TextWidget(
+                f"×{score_multiplicateur} (Score x2)",
+                font_size=48,
+                color=(255, 215, 0),
+                pos=(center_x, center_y + 100),
+                anchor="center",
+                bold=True
+            )
+            self.ajouterObject(multiplier_text)
+            threading.Timer(2.5, multiplier_text.kill).start()
 
     # Menu d'inventaire
     def toggleInventory(self):
@@ -239,7 +271,6 @@ class PlateauMenu(MainMenu, ControlsGetter):
         # Vérifier si l'inventaire est vide
         inventory = self.getInventory()
         if not inventory or len(inventory) == 0:
-            print("L'inventaire est vide!")
             self.showEmptyInventoryMessage()
             return
         
@@ -248,7 +279,6 @@ class PlateauMenu(MainMenu, ControlsGetter):
         
         self.inventoryOpen = True
         self.selectedInventoryItemIndex = 0
-        print("Ouverture de l'inventaire...")
         
         # Fond semi-transparent
         overlay_bg = ImageWidget(
@@ -357,7 +387,6 @@ class PlateauMenu(MainMenu, ControlsGetter):
         if not self.inventoryOpen:
             return
         
-        print("Fermeture de l'inventaire...")
         self.inventoryOpen = False
         self.selectedInventoryItemIndex = 0
         
@@ -417,7 +446,6 @@ class PlateauMenu(MainMenu, ControlsGetter):
         pion = self.getPlateau().getPion
         
         # Utiliser l'item
-        print(f"Utilisation de : {selected_item.getName()}")
         selected_item.onUse()
         
         # Retirer l'item de l'inventaire
@@ -486,7 +514,6 @@ class PlateauMenu(MainMenu, ControlsGetter):
         
         # Vérifier si on est sur une case boutique
         if not self.isOnShop():
-            print("Vous n'êtes pas sur une case boutique !")
             self.showNotOnShopMessage()
             return
         
@@ -495,7 +522,6 @@ class PlateauMenu(MainMenu, ControlsGetter):
         
         self.shopOpen = True
         self.selectedItemIndex = 0
-        print("Ouverture de la boutique...")
         
         # Fond semi-transparent
         overlay_bg = ImageWidget(
@@ -633,7 +659,6 @@ class PlateauMenu(MainMenu, ControlsGetter):
         if not self.shopOpen:
             return
         
-        print("Fermeture de la boutique...")
         self.shopOpen = False
         self.selectedItemIndex = 0
         
@@ -710,7 +735,6 @@ class PlateauMenu(MainMenu, ControlsGetter):
         
         # Vérifier si le joueur a assez de points
         if current_score < self.ITEM_PRICE:
-            print("Pas assez de points pour acheter cet item !")
             self.showInsufficientFundsMessage()
             return
         
@@ -724,7 +748,6 @@ class PlateauMenu(MainMenu, ControlsGetter):
         # Déduire le prix
         self.addScore(-self.ITEM_PRICE)
         
-        print(f"Vous avez acheté : {selected_item.getName()} !")
         self.showPurchaseSuccessMessage(selected_item.getName())
         
         # Rafraîchir l'affichage
@@ -787,7 +810,6 @@ class PlateauMenu(MainMenu, ControlsGetter):
         from main.gui.fenetre import WIDTH, HEIGHT
         
         rule, was_added = random_rule_event()
-        print(f"Règle événement : {rule}, Ajoutée : {was_added}")
         
         if rule is None:
             return (None, None)
@@ -896,59 +918,88 @@ class PlateauMenu(MainMenu, ControlsGetter):
 
     def miniGameEnded(self, success: bool):
         self.setPaused(False)
-        self.set_can_press_key(True)
+        self.set_can_press_key(False)  # Désactiver les contrôles pendant l'affichage
         scoreVictoire = 5
         scoreDefaite = -3
 
-        # Afficher la règle d'abord et récupérer le résultat
-        rule, was_added = self.ruleEvents()
-        print(f"Règle appliquée après mini-jeu : {rule}, Ajoutée : {was_added}")
-        
-        # Si une règle a été affichée, attendre avant le score
-        if rule is not None:
-            # Attendre 4 secondes avant d'afficher le score
-            # (3.5s pour lire la règle + 0.5s de pause)
-            def show_score():
-                if success:
-                    self.addScore(scoreVictoire)
-                else:
-                    self.addScore(scoreDefaite)
-            
-            threading.Timer(4, show_score).start()
+        # Afficher le score d'abord
+        if success:
+            self.addScore(scoreVictoire)
         else:
-            # Pas de règle, afficher le score immédiatement
-            if success:
-                self.addScore(scoreVictoire)
+            self.addScore(scoreDefaite)
+        
+        # Fonction pour afficher la règle après le score
+        def show_rule():
+            rule, was_added = self.ruleEvents()
+            
+            # Réactiver les contrôles après l'affichage de la règle (3.5s de durée)
+            if rule is not None:
+                threading.Timer(3.5, lambda: self.set_can_press_key(True)).start()
             else:
-                self.addScore(scoreDefaite)
+                # Si pas de règle, réactiver immédiatement
+                self.set_can_press_key(True)
+        
+        # Attendre 2.5 secondes (durée du message de score) avant d'afficher la règle
+        threading.Timer(2.5, show_rule).start()
 
     # Actions du joueur
 
     def initEnd(self, reached_end=True):
+        self.setPaused(True)
+        self.set_can_press_key(False)
+        
+        from main.gui.fenetre import WIDTH, HEIGHT
+        import sys
+        
+        center_x = WIDTH // 2
+        center_y = HEIGHT // 2
+        
         if reached_end:
-            print("Le pion a atteint la fin du chemin. Fin du jeu.")
+            text = "FÉLICITATIONS ! Vous avez gagné !"
+            color = (100, 255, 100)  # Vert
+            pass
         else:
-            print("Le score est devenu négatif. Vous avez perdu.")
+            text = "GAME OVER Vous avez perdu !"
+            color = (255, 100, 100)  # Rouge
+            pass
+        
+        end_message = TextWidget(
+            text,
+            font_size=72,
+            color=color,
+            pos=(center_x, center_y),
+            anchor="center",
+            bold=True
+        )
+        self.ajouterObject(end_message)
+        
+        # Fermer le jeu après 3 secondes
+        def quit_game():
+            pass
+            sys.exit(0)
+        
+        threading.Timer(3, quit_game).start()
 
     def moveAll(self):
         plateau = self.getPlateau()
         pion = plateau.getPion
         path = plateau.getPathArray[pion.getPath]
         if pion.getCase >= path.getLength - 1:
-            self.initEnd()
+            self.initEnd(True)
             return
         self.avancerPion()
         self.updateCurrentCase()
 
     def jetDe(self):
+        global case_bonus, case_multiplicateur
         from main.plateau.die.die import lancer_de
         value = lancer_de()
         string = f"Tu as obtenu : {value} !"
-        self.setDiceText(string)
+        self.setDiceText(string, case_bonus, case_multiplicateur)
         return value
     
     def avancerPion(self):
-        global case_bonus
+        global case_bonus, case_multiplicateur
         from main.plateau.plateau_utils import movePion
 
         de = self.jetDe()
@@ -959,7 +1010,18 @@ class PlateauMenu(MainMenu, ControlsGetter):
         
         movePion(self.getPlateau(), de)
         self.updateScoreDisplay()
-        self.lancerMiniGamePre()
+        
+        # Vérifier si le pion a atteint la fin
+        plateau = self.getPlateau()
+        pion = plateau.getPion
+        path = plateau.getPathArray[pion.getPath]
+        if pion.getCase >= path.getLength - 1:
+            # Désactiver les contrôles immédiatement
+            self.set_can_press_key(False)
+            # Attendre 2 secondes pour laisser l'animation du pion se terminer
+            threading.Timer(2, lambda: self.initEnd(True)).start()
+        else:
+            self.lancerMiniGamePre()
 
     def updateCurrentCase(self):
         currentCase = self.getCurrentCaseIndex()
@@ -1000,6 +1062,7 @@ class PlateauMenu(MainMenu, ControlsGetter):
         new_score = pion.getScore + points * score_multiplicateur
         if new_score < 0:
             self.initEnd(False)
+            return
         pion.setScore(new_score)
         self.updateScoreDisplay()
         self.setScoreChangeText(points)
@@ -1041,20 +1104,17 @@ class PlateauMenu(MainMenu, ControlsGetter):
             self.buySelectedItem()
             return None
         
-        print("Space pressed - moving all entities")
         self.moveAll()
         """Placeholder invoked when the Space key is pressed."""
         return None
 
     def e_on_press(self):
         """Ouvre ou ferme l'inventaire quand 'E' est pressé."""
-        print("Touche 'E' pressée - Toggle inventaire")
         self.toggleInventory()
         return None
     
     def i_on_press(self):
         """Ouvre ou ferme la boutique quand 'I' est pressé."""
-        print("Touche 'I' pressée - Toggle boutique")
         self.toggleShop()
         return None
 
