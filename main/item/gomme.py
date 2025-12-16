@@ -11,7 +11,8 @@ class Gomme(Item):
 
     def onUse(self):
         from main.rules.rule_list import get_random_active_rule, remove_rule
-        import main
+        from main.main import isGuiMode
+        import main.main as main
         
         # Récupérer une règle active aléatoire
         rule = get_random_active_rule()
@@ -21,12 +22,12 @@ class Gomme(Item):
             remove_rule(rule)
             
             # Afficher la règle retirée visuellement (seulement en mode GUI)
-            if main.isGuiMode():
+            if isGuiMode():
                 main.mainMenu.displayRemovedRule(rule)
             else:
                 # En mode console, afficher dans la console
                 print(f"\n🗑️  Gomme utilisée : règle '{rule.name}' retirée !")
                 print(f"    {rule.description}")
         else:
-            if not main.isGuiMode():
+            if not isGuiMode():
                 print("\n⚠️  Aucune règle active à retirer !")
