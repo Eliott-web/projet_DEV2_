@@ -733,8 +733,8 @@ class PlateauMenu(MainMenu, ControlsGetter):
         
         current_score = self.getScore()
         
-        # Vérifier si le joueur a assez de points
-        if current_score < self.ITEM_PRICE:
+        # Vérifier si le joueur a assez de points ET que le score ne sera pas <= 0 après l'achat
+        if current_score < self.ITEM_PRICE or (current_score - self.ITEM_PRICE) <= 0:
             self.showInsufficientFundsMessage()
             return
         
@@ -797,6 +797,19 @@ class PlateauMenu(MainMenu, ControlsGetter):
         )
         self.ajouterObject(message)
         threading.Timer(2, message.kill).start()
+    
+    def showShopNotification(self):
+        """Affiche un message en haut à gauche pour informer qu'on est sur une case magasin"""
+        message = TextWidget(
+            "Case Magasin - Appuyez sur 'I' pour acheter",
+            font_size=28,
+            color=(255, 215, 0),  # Couleur or
+            pos=(20, 20),
+            anchor="topleft",
+            bold=True
+        )
+        self.ajouterObject(message)
+        threading.Timer(4, message.kill).start()
 
     # Gestion des règles
     def ruleEvents(self):
@@ -931,6 +944,10 @@ class PlateauMenu(MainMenu, ControlsGetter):
         # Fonction pour afficher la règle après le score
         def show_rule():
             rule, was_added = self.ruleEvents()
+            
+            # Afficher le message de magasin si on est sur une case boutique
+            if self.isOnShop():
+                self.showShopNotification()
             
             # Réactiver les contrôles après l'affichage de la règle (3.5s de durée)
             if rule is not None:

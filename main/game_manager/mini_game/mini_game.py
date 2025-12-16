@@ -7,7 +7,7 @@ from main.gui.widget.image import ImageWidget
 from .controls.controls_getter import ControlsGetter
 
 class MiniGame(ControlsGetter):
-    default_time_limit = 5  # secondes
+    default_time_limit = 10  # secondes
     refresh_rate = 20  # FPS
 
     def __init__(self, name, description):
@@ -24,6 +24,7 @@ class MiniGame(ControlsGetter):
         self._text_space = None
         self._text_end = None
         self._loop_timer = None  # Track the loop timer to cancel it
+        self._timer_widget = None  # Widget pour afficher le temps restant
 
     def __repr__(self):
         return f"Mini-jeu: {self._name} - {self._description}"
@@ -82,6 +83,36 @@ class MiniGame(ControlsGetter):
             self._text_end.kill()
             self._text_end = None
 
+    def _create_timer_widget(self):
+        """Crée le widget pour afficher le temps restant."""
+        from main.gui.widget.text import TextWidget
+        
+        center_x, _ = self.getCenterXY()
+        self._timer_widget = TextWidget(
+            self._get_timer_text(),
+            font_size=48,
+            color=(255, 215, 0),  # Couleur or
+            pos=(center_x, 30),
+            anchor="center",
+            bold=True
+        )
+
+    def _update_timer_widget(self):
+        """Met à jour le texte du widget timer."""
+        if self._timer_widget:
+            self._timer_widget.set_text(self._get_timer_text())
+
+    def _get_timer_text(self):
+        """Retourne le texte formaté du timer."""
+        time_remaining = self._time_limit - self._timer
+        return f"Temps: {time_remaining:.1f}s"
+
+    def _destroy_timer_widget(self):
+        """Détruit le widget du timer."""
+        if self._timer_widget:
+            self._timer_widget.kill()
+            self._timer_widget = None
+
     def start(self):
         """Load/init everything but don't run the main loop until Space is pressed."""
         self.load()
@@ -128,6 +159,7 @@ class MiniGame(ControlsGetter):
             self._loop_timer = None
         self._hasStarted = True
         self.reset_timer()
+        self._create_timer_widget()  # Créer le widget du timer
         self.loop()
 
     # -- End / cleanup handling (separated) --
@@ -144,6 +176,9 @@ class MiniGame(ControlsGetter):
         if self._loop_timer:
             self._loop_timer.cancel()
             self._loop_timer = None
+        
+        # Détruire le widget du timer
+        self._destroy_timer_widget()
         
         # prevent further game activity
         self._endInstantly = True
@@ -193,7 +228,7 @@ class MiniGame(ControlsGetter):
         menu.set_can_press_key(True)
         menu.miniGameEnded(success)
 
-
+        self._destroy_timer_widget()
         self.stopEndText()
         # kill mobs and clear
     
@@ -289,6 +324,9 @@ class MiniGame(ControlsGetter):
 
         refreshDelay = self.gerRefreshRatePeriod()
         end = self.update_timer()
+        
+        # Mettre à jour l'affichage du timer
+        self._update_timer_widget()
 
         if (end):
             win = self.winCondition()
