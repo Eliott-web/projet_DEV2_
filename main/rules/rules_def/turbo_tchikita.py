@@ -6,7 +6,6 @@ class Turbo(Rule):
 
     def __init__(self):
         super().__init__("Turbo tchikita","vous avancez en X2")
-        self.valeur_de = 0
     def on_add(self):
         from main.main_loop import plateau_menu
         plateau_menu.case_multiplicateur = 2
