@@ -1,3 +1,16 @@
+class PlateauException(Exception):
+    pass
+
+class PlateauTypeException(PlateauException):
+    pass
+
+class PlateauIndexException(PlateauException):
+    pass
+
+class PlateauPionException(PlateauException):
+    pass
+
+
 class Plateau:
     def __init__(self):
         self._path = []
@@ -6,10 +19,11 @@ class Plateau:
     def __repr__(self):
         return f"Le plateau contient {self.getPathArray}"
 
-    # Setters
-
     def addPath(self, path):
-        self.setPathArray(self.getPathArray + [path])
+        try:
+            self.setPathArray(self.getPathArray + [path])
+        except PlateauTypeException as e:
+            raise PlateauTypeException(f"Impossible d'ajouter le chemin : {e}")
 
     def removePath(self, index):
         array = self.getPathArray
@@ -17,17 +31,18 @@ class Plateau:
             del array[index]
             self.setPathArray(array)
         else:
-            print("⚠️ Cette index n'existe pas ⚠️")
+            raise PlateauIndexException(f"Index {index} invalide pour un tableau de taille {len(array)}")
 
-    def setPathArray(self,path): ## !!! Ca doit être un array
+    def setPathArray(self, path):
+        if not isinstance(path, list):
+            raise PlateauTypeException(f"Le chemin doit être une liste, pas un {type(path).__name__}")
         self._path = path
 
     def setPion(self, pion):
+        if self._pion is not None:
+            raise PlateauPionException("Un pion est déjà présent sur le plateau")
         self._pion = pion
         pion.setPlateau(self)
-        
-
-    # Getters
 
     @property
     def getPathArray(self):
