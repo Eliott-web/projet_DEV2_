@@ -1,8 +1,7 @@
 import unittest
 from main.plateau.die import die
 
-# On importe les règles uniquement dans les fonctions pour éviter les circular imports
-# et ne pas toucher aux fichiers du groupe
+
 
 class TestRules(unittest.TestCase):
 
