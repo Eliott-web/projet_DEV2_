@@ -1,3 +1,5 @@
+#test unitaire Eliott
+
 import unittest
 import random
 from main.plateau.die.die import lancer_de
